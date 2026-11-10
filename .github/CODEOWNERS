@@ -1,0 +1,26 @@
+# À COMPLÉTER : remplacer par vos vrais noms d'utilisateur GitHub (ex. @ilyass-b), puis supprimer ces commentaires.
+# GitHub demandera automatiquement la relecture du propriétaire quand quelqu'un touche ses fichiers.
+# Personne 1 = chaîne Connaissance ; Personne 2 = chaîne Dossier.
+
+# Chaîne Connaissance
+/src/smart_immigration/knowledge/   @PERSONNE_1
+/tests/knowledge/                   @PERSONNE_1
+/data/sources.yaml                  @PERSONNE_1
+/data/seed/                         @PERSONNE_1
+/eval/knowledge/                    @PERSONNE_1
+
+# Chaîne Dossier
+/src/smart_immigration/dossier/     @PERSONNE_2
+/tests/dossier/                     @PERSONNE_2
+/rules/                             @PERSONNE_2
+/data/synthetic/                    @PERSONNE_2
+/eval/dossier/                      @PERSONNE_2
+/frontend/                          @PERSONNE_2
+
+# Fichiers communs : les deux doivent valider
+/src/smart_immigration/schemas.py   @PERSONNE_1 @PERSONNE_2
+/docs/                              @PERSONNE_1 @PERSONNE_2
+/README.md                          @PERSONNE_1 @PERSONNE_2
+/CLAUDE.md                          @PERSONNE_1 @PERSONNE_2
+/requirements.txt                   @PERSONNE_1 @PERSONNE_2
+/.github/                           @PERSONNE_1 @PERSONNE_2

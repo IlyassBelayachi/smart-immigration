@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>Smart Immigration — Démo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #172b4d;
+      background: #f3f6fa;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #102a43; color: white; padding: 2rem max(1.25rem, calc((100% - 1040px) / 2)); }
+    header p { max-width: 720px; margin: .6rem 0 0; color: #d9e7f2; line-height: 1.6; }
+    h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.4rem); }
+    main { max-width: 1040px; margin: 1.5rem auto; padding: 0 1rem 3rem; }
+    .notice { border-left: 4px solid #d99a24; background: #fff8e6; padding: .8rem 1rem; line-height: 1.5; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .9fr); gap: 1rem; align-items: start; }
+    .card { background: white; border: 1px solid #dce4ec; border-radius: 12px; padding: 1.25rem; box-shadow: 0 3px 12px #102a430a; }
+    h2 { font-size: 1.2rem; margin: 0 0 1rem; }
+    h3 { font-size: 1rem; margin: 1.25rem 0 .5rem; }
+    label { display: block; font-size: .9rem; font-weight: 650; margin: .8rem 0 .35rem; }
+    input, select, textarea { width: 100%; border: 1px solid #aebdca; border-radius: 7px; padding: .65rem .7rem; font: inherit; background: white; color: inherit; }
+    textarea { min-height: 95px; resize: vertical; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .75rem; }
+    button { border: 0; border-radius: 8px; background: #176b87; color: white; font: inherit; font-weight: 700; padding: .75rem 1rem; margin-top: 1rem; cursor: pointer; }
+    button:hover { background: #10576f; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .muted { color: #526579; font-size: .88rem; line-height: 1.5; }
+    .empty { color: #526579; margin: .4rem 0; }
+    .error { color: #a61b1b; background: #fff0ef; border-radius: 8px; padding: .8rem; }
+    .result + .result { border-top: 1px solid #e4eaf0; margin-top: 1rem; padding-top: .5rem; }
+    .tag { display: inline-block; font-size: .75rem; border-radius: 99px; padding: .18rem .55rem; margin-right: .4rem; background: #e8eef4; font-weight: 700; }
+    .tag-good { background: #e3f5eb; color: #17663a; }
+    .tag-warn { background: #fff3d4; color: #76520c; }
+    .tag-bad { background: #ffebe8; color: #a61b1b; }
+    .source { border-top: 1px solid #e4eaf0; padding: .65rem 0; }
+    .source a { color: #075985; font-weight: 650; }
+    .source p { margin: .35rem 0; line-height: 1.5; }
+    .item { padding: .7rem 0; border-bottom: 1px solid #e4eaf0; }
+    .item:last-child { border-bottom: 0; }
+    @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 440px) { .fields { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Smart Immigration</h1>
+    <p>Préparer un dossier de permis d’études au Canada avec des réponses sourcées et des critères explicables.</p>
+  </header>
+  <main>
+    <p class="notice"><strong>Prototype de démonstration.</strong> Les résultats sont indicatifs : ils ne constituent pas un avis juridique et ne garantissent aucune décision d’IRCC. Les informations déclarées ici ne sont pas vérifiées.</p>
+    <div class="layout">
+      <form class="card" id="demo-form">
+        <h2>Question et profil</h2>
+        <label for="question">Votre question</label>
+        <textarea id="question" minlength="3" maxlength="1000" required placeholder="Ex. Quels documents dois-je fournir pour ma demande ?"></textarea>
+        <p class="muted">La réponse s’appuie sur les passages disponibles dans le corpus ; en cas de doute, l’assistant s’abstient.</p>
+        <h3>Informations du profil</h3>
+        <div class="fields">
+          <div>
+            <label for="province">Province de destination</label>
+            <select id="province">
+              <option value="">Non renseignée</option>
+              <option value="ON">Ontario</option>
+              <option value="QC">Québec</option>
+              <option value="BC">Colombie-Britannique</option>
+              <option value="AB">Alberta</option>
+              <option value="MB">Manitoba</option>
+              <option value="SK">Saskatchewan</option>
+              <option value="NS">Nouvelle-Écosse</option>
+              <option value="NB">Nouveau-Brunswick</option>
+              <option value="NL">Terre-Neuve-et-Labrador</option>
+              <option value="PE">Île-du-Prince-Édouard</option>
+              <option value="NT">Territoires du Nord-Ouest</option>
+              <option value="YT">Yukon</option>
+              <option value="NU">Nunavut</option>
+            </select>
+          </div>
+          <div>
+            <label for="level">Niveau d’études</label>
+            <select id="level">
+              <option value="">Non renseigné</option>
+              <option value="secondary">Secondaire</option>
+              <option value="college">Collège</option>
+              <option value="bachelor">Licence / bachelor</option>
+              <option value="master">Master</option>
+              <option value="phd">Doctorat</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+          <div>
+            <label for="acceptance">Lettre d’acceptation déclarée</label>
+            <select id="acceptance"><option value="">Je ne sais pas</option><option value="true">Oui</option><option value="false">Non</option></select>
+          </div>
+          <div>
+            <label for="pal">PAL/TAL déclaré</label>
+            <select id="pal"><option value="">Je ne sais pas</option><option value="true">Oui</option><option value="false">Non</option></select>
+          </div>
+          <div>
+            <label for="caq">CAQ déclaré (Québec)</label>
+            <select id="caq"><option value="">Je ne sais pas</option><option value="true">Oui</option><option value="false">Non</option></select>
+          </div>
+          <div>
+            <label for="public-dli">Établissement public</label>
+            <select id="public-dli"><option value="">Je ne sais pas</option><option value="true">Oui</option><option value="false">Non</option></select>
+          </div>
+          <div>
+            <label for="application-date">Date prévue de demande</label>
+            <input id="application-date" type="date">
+          </div>
+          <div>
+            <label for="family-size">Taille de la famille</label>
+            <input id="family-size" type="number" min="1" step="1">
+          </div>
+          <div>
+            <label for="funds">Fonds disponibles (CAD)</label>
+            <input id="funds" type="number" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="tuition">Scolarité première année (CAD)</label>
+            <input id="tuition" type="number" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="transport">Transport (CAD)</label>
+            <input id="transport" type="number" min="0" step="0.01">
+          </div>
+        </div>
+        <button id="submit" type="submit">Analyser la demande</button>
+      </form>
+      <section class="card" aria-live="polite" aria-busy="false" id="results">
+        <h2>Résultats</h2>
+        <p class="empty" id="initial">Remplissez le formulaire pour afficher la réponse sourcée, les verdicts et la checklist.</p>
+        <div id="error" class="error" hidden></div>
+        <section class="result" id="answer-section" hidden>
+          <h3>Réponse à la question</h3>
+          <p id="answer-text"></p>
+          <div id="sources"></div>
+        </section>
+        <section class="result" id="assessment-section" hidden>
+          <h3>Vérification des critères</h3>
+          <div id="assessment"></div>
+        </section>
+        <section class="result" id="checklist-section" hidden>
+          <h3>Pièces et informations à suivre</h3>
+          <div id="checklist"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <script>
+    const form = document.querySelector("#demo-form");
+    const results = document.querySelector("#results");
+    const submit = document.querySelector("#submit");
+    const verdictLabels = { MEETS: "Renseigné", DOES_NOT_MEET: "À fournir", UNKNOWN: "À confirmer" };
+    const checklistLabels = { declared: "Déclaré", to_provide: "À fournir", to_confirm: "À confirmer", not_assessed: "Non évalué" };
+
+    function optionalBoolean(id) {
+      const value = document.querySelector(`#${id}`).value;
+      return value === "" ? null : value === "true";
+    }
+
+    function optionalNumber(id) {
+      const value = document.querySelector(`#${id}`).value;
+      return value === "" ? null : Number(value);
+    }
+
+    function showText(parent, tagName, text, className) {
+      const element = document.createElement(tagName);
+      element.textContent = text;
+      if (className) element.className = className;
+      parent.append(element);
+      return element;
+    }
+
+    function addSources(target, evidence) {
+      target.replaceChildren();
+      if (!evidence.length) {
+        showText(target, "p", "Aucune source suffisamment pertinente : l’assistant s’abstient.", "muted");
+        return;
+      }
+      for (const source of evidence) {
+        const item = document.createElement("div");
+        item.className = "source";
+        const link = document.createElement("a");
+        link.href = source.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = source.title;
+        item.append(link);
+        showText(item, "p", source.excerpt);
+        const dates = [source.page_modified ? `Page mise à jour : ${source.page_modified}` : null,
+          source.retrieved_at ? `Lue le : ${new Date(source.retrieved_at).toLocaleDateString("fr-FR")}` : null]
+          .filter(Boolean).join(" · ");
+        if (dates) showText(item, "p", dates, "muted");
+        target.append(item);
+      }
+    }
+
+    function renderAssessment(report) {
+      const target = document.querySelector("#assessment");
+      target.replaceChildren();
+      for (const item of report.results) {
+        const row = document.createElement("div");
+        row.className = "item";
+        const color = item.verdict === "MEETS" ? "tag tag-good" :
+          item.verdict === "DOES_NOT_MEET" ? "tag tag-bad" : "tag tag-warn";
+        showText(row, "span", verdictLabels[item.verdict] || item.verdict, color);
+        showText(row, "strong", item.title);
+        showText(row, "p", item.explanation);
+        if (item.missing_inputs.length) showText(row, "p", `Informations manquantes : ${item.missing_inputs.join(", ")}`, "muted");
+        target.append(row);
+      }
+      showText(target, "p", report.disclaimer, "muted");
+    }
+
+    function renderChecklist(checklist) {
+      const target = document.querySelector("#checklist");
+      target.replaceChildren();
+      for (const item of checklist.items) {
+        const row = document.createElement("div");
+        row.className = "item";
+        const color = item.status === "declared" ? "tag tag-good" :
+          item.status === "to_provide" ? "tag tag-bad" : "tag tag-warn";
+        showText(row, "span", checklistLabels[item.status] || item.status, color);
+        showText(row, "strong", item.title);
+        showText(row, "p", item.message);
+        if (item.missing_inputs.length) showText(row, "p", `À renseigner : ${item.missing_inputs.join(", ")}`, "muted");
+        for (const url of item.source_urls) {
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Consulter la source officielle";
+          row.append(link, document.createElement("br"));
+        }
+        target.append(row);
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const error = document.querySelector("#error");
+      error.hidden = true;
+      document.querySelector("#initial").hidden = true;
+      results.setAttribute("aria-busy", "true");
+      submit.disabled = true;
+      submit.textContent = "Analyse en cours…";
+
+      const profile = {
+        destination_province: document.querySelector("#province").value || null,
+        level_of_study: document.querySelector("#level").value || null,
+        has_letter_of_acceptance: optionalBoolean("acceptance"),
+        pal_provided: optionalBoolean("pal"),
+        caq_provided: optionalBoolean("caq"),
+        dli_is_public: optionalBoolean("public-dli"),
+        application_date: document.querySelector("#application-date").value || null,
+        family_size: optionalNumber("family-size"),
+        funds_available_cad: optionalNumber("funds"),
+        tuition_first_year_cad: optionalNumber("tuition"),
+        transport_cost_cad: optionalNumber("transport")
+      };
+
+      try {
+        const requests = await Promise.all([
+          fetch("/ask", { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: document.querySelector("#question").value }) }),
+          fetch("/assess", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) }),
+          fetch("/checklist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) })
+        ]);
+        const failed = requests.find((response) => !response.ok);
+        if (failed) throw new Error(`L’API a répondu avec le statut ${failed.status}. Consultez /docs pour diagnostiquer le problème.`);
+        const [answer, assessment, checklist] = await Promise.all(requests.map((response) => response.json()));
+
+        document.querySelector("#answer-section").hidden = false;
+        document.querySelector("#answer-text").textContent = answer.answered ? answer.answer : answer.abstention_reason;
+        addSources(document.querySelector("#sources"), answer.evidence);
+        document.querySelector("#assessment-section").hidden = false;
+        renderAssessment(assessment);
+        document.querySelector("#checklist-section").hidden = false;
+        renderChecklist(checklist);
+      } catch (reason) {
+        error.textContent = reason instanceof Error ? reason.message : "Une erreur inattendue est survenue.";
+        error.hidden = false;
+      } finally {
+        results.setAttribute("aria-busy", "false");
+        submit.disabled = false;
+        submit.textContent = "Analyser la demande";
+      }
+    });
+  </script>
+</body>
+</html>

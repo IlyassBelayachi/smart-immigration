@@ -1,0 +1,41 @@
+# Regles declaratives - Canada, permis d'etudes (demande depuis l'exterieur du Canada).
+# Chaque regle cite sa source IRCC et la date "Page details" lue le 2026-11-10.
+# Les montants/dates DOIVENT etre reverifies sur la page officielle avant la demo finale (les regles changent).
+pathway: study_permit_CA
+version: "2026-11-10"
+rules:
+  - id: CA-SP-001
+    type: required_flag
+    title: Lettre d'acceptation d'un etablissement designe (DLI)
+    field: has_letter_of_acceptance
+    meets: "Une lettre d'acceptation d'un DLI est declaree."
+    fails: "Aucune lettre d'acceptation d'un DLI n'est declaree ; elle fait partie des documents a fournir."
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/apply.html
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/eligibility.html
+
+  - id: CA-SP-002
+    type: attestation_letter
+    title: Lettre d'attestation provinciale/territoriale (PAL/TAL) ou CAQ au Quebec
+    # Exemption verifiee : maitrise/doctorat dans un DLI public (programmes commencant a partir du 2026-01-01).
+    exempt_levels: [master, phd]
+    exempt_requires_public_dli: true
+    quebec_code: QC
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents/provincial-attestation-letter.html
+
+  - id: CA-SP-003
+    type: funds_threshold
+    title: Fonds suffisants pour la premiere annee (frais de vie + scolarite + transport)
+    # required = living_expenses(family_size, date) + tuition + transport ; hors Quebec.
+    tables:
+      - from: "2025-01-01"
+        to: "2026-08-31"
+        per_family_size: {1: 22895, 2: 28502, 3: 35040, 4: 42543, 5: 48252, 6: 54420, 7: 60589}
+        extra_member: 6170
+      - from: "2026-09-01"
+        to: null
+        per_family_size: {1: 23448, 2: 29192, 3: 35888, 4: 43572, 5: 49419, 6: 55736, 7: 62054}
+        extra_member: 6318
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents/financial-support.html
