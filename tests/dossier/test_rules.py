@@ -48,6 +48,14 @@ def test_funds_quebec_is_unknown_not_guessed():
     assert by_id(assess(p), "CA-SP-003").verdict == Verdict.UNKNOWN
 
 
+def test_funds_requires_destination_even_when_amounts_are_complete():
+    profile = ApplicantProfile(application_date=date(2026, 10, 1), family_size=1,
+                               funds_available_cad=50000, tuition_first_year_cad=15000, transport_cost_cad=2000)
+    result = by_id(assess(profile), "CA-SP-003")
+    assert result.verdict == Verdict.UNKNOWN
+    assert result.missing_inputs == ["destination_province"]
+
+
 def test_pal_missing_vs_provided_vs_exempt():
     base = dict(destination_province="ON", level_of_study="bachelor")
     assert by_id(assess(ApplicantProfile(**base, pal_provided=True)), "CA-SP-002").verdict == Verdict.MEETS

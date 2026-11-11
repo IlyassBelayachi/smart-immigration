@@ -48,21 +48,183 @@
     @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
     @media (max-width: 440px) { .fields { grid-template-columns: 1fr; } }
   </style>
+  <link rel="stylesheet" href="./portal.css">
 </head>
 <body>
-  <header>
+  <header id="candidate-banner" hidden>
     <h1>Smart Immigration</h1>
     <p>Préparer un dossier de permis d’études au Canada avec des réponses sourcées et des critères explicables.</p>
   </header>
-  <main>
+  <main id="portal-home">
+    <p class="portal-brand">Smart Immigration</p>
+    <h1>Choisissez votre espace</h1>
+    <p class="portal-intro">Préparez ou examinez un dossier d’immigration depuis le Maroc.</p>
+    <div class="role-grid">
+      <button type="button" class="role-card candidate-card" data-role="candidate">
+        <span class="role-card-content"><strong>Candidat</strong><span>Préparer et suivre mon dossier</span><span aria-hidden="true">↗</span></span>
+      </button>
+      <button type="button" class="role-card consultant-card" data-role="consultant">
+        <span class="role-card-content"><strong>Consultant</strong><span>Examiner les dossiers et demander des compléments</span><span aria-hidden="true">↗</span></span>
+      </button>
+    </div>
+  </main>
+  <main id="portal-auth" hidden>
+    <button type="button" class="portal-secondary" id="choose-role">← Choisir un autre espace</button>
+    <section class="card auth-card">
+      <h1 id="auth-title"></h1>
+      <div class="auth-modes">
+        <button type="button" id="mode-signin" aria-pressed="true">Connexion</button>
+        <button type="button" id="mode-signup" aria-pressed="false">Inscription</button>
+      </div>
+      <form id="auth-form">
+        <div id="signup-name" hidden><label for="account-name">Nom</label><input id="account-name" autocomplete="name" maxlength="80"></div>
+        <fieldset id="signup-identity" hidden>
+          <legend>Identifiants fictifs de démonstration</legend>
+          <label for="account-cin">Numéro de CIN</label>
+          <input id="account-cin" pattern="DEMO-[A-Z0-9]{4,16}" placeholder="DEMO-CIN01" autocomplete="off">
+          <label for="account-passport">Numéro de passeport</label>
+          <input id="account-passport" pattern="DEMO-[A-Z0-9]{4,16}" placeholder="DEMO-PASS01" autocomplete="off">
+        </fieldset>
+        <label for="account-email">Adresse e-mail</label>
+        <input id="account-email" type="email" autocomplete="username" maxlength="254" required>
+        <label for="account-password">Mot de passe</label>
+        <input id="account-password" type="password" minlength="10" maxlength="128" autocomplete="current-password" required>
+        <div id="signup-invite" hidden><label for="account-invite">Code d’invitation consultant</label><input id="account-invite" autocomplete="off" type="password" maxlength="128"></div>
+        <button type="submit" id="auth-submit">Se connecter</button>
+        <p role="status" id="auth-status"></p>
+      </form>
+    </section>
+  </main>
+  <main id="portal-workspace" hidden>
+    <div class="workspace-bar"><h1 id="workspace-title"></h1><div>
+      <button type="button" id="refresh-cases" class="portal-secondary">Actualiser</button>
+      <button type="button" id="signout" class="portal-secondary">Se déconnecter</button>
+    </div></div>
+    <p role="status" id="workspace-status"></p>
+    <section id="consultant-dashboard" hidden>
+      <div class="dashboard-hero">
+        <div>
+          <h2 id="consultant-greeting"></h2>
+          <p id="consultant-next"></p>
+          <button type="button" class="consultant-primary" data-consultant-filter="submitted">Voir les dossiers à examiner</button>
+        </div>
+        <div class="dashboard-orbit" aria-hidden="true"></div>
+      </div>
+      <div class="dashboard-grid" aria-label="Filtrer les dossiers par statut">
+        <button type="button" class="dashboard-tile" data-consultant-filter="submitted"><strong>À examiner</strong><span id="consultant-submitted"></span></button>
+        <button type="button" class="dashboard-tile" data-consultant-filter="needs_changes"><strong>Compléments demandés</strong><span id="consultant-needs_changes"></span></button>
+        <button type="button" class="dashboard-tile" data-consultant-filter="closed"><strong>Examens clôturés</strong><span id="consultant-closed"></span></button>
+      </div>
+      <div class="workspace-bar consultant-list-heading">
+        <h2 id="consultant-list-title" tabindex="-1">Tous les dossiers</h2>
+        <button type="button" class="portal-secondary" data-consultant-filter="all">Voir tous les dossiers</button>
+      </div>
+    </section>
+    <div id="candidate-dashboard" hidden>
+      <nav class="candidate-nav" aria-label="Espace candidat">
+        <button type="button" data-candidate-view="overview" aria-current="page">Accueil</button>
+        <button type="button" data-candidate-view="form">Formulaire</button>
+        <button type="button" data-candidate-view="cases">Mes candidatures</button>
+        <button type="button" data-candidate-view="documents">Mes documents</button>
+        <button type="button" data-candidate-view="profile">Mon profil</button>
+      </nav>
+      <section id="candidate-overview" class="candidate-overview">
+        <div class="dashboard-hero">
+          <div>
+            <h2 id="candidate-greeting"></h2>
+            <p id="candidate-next"></p>
+            <button type="button" id="candidate-primary" data-candidate-view="form">Commencer mon dossier</button>
+          </div>
+          <div class="dashboard-orbit" aria-hidden="true"></div>
+        </div>
+        <div class="dashboard-grid">
+          <button type="button" class="dashboard-tile" data-candidate-view="cases"><strong>Ma candidature</strong><span id="dashboard-case-status"></span></button>
+          <button type="button" class="dashboard-tile" data-candidate-view="documents"><strong>Mes documents</strong><span id="dashboard-file-count"></span></button>
+          <button type="button" class="dashboard-tile" data-candidate-view="profile"><strong>Mon profil</strong><span>Voir et mettre à jour mon nom</span></button>
+        </div>
+        <section class="card dashboard-activity">
+          <h3>Activité récente</h3>
+          <ul id="candidate-activity"></ul>
+        </section>
+      </section>
+      <section id="candidate-documents" class="card dashboard-panel" hidden>
+        <h2>Mes documents</h2>
+        <div id="candidate-document-list"></div>
+      </section>
+      <section id="candidate-profile" class="card dashboard-panel" hidden>
+        <h2>Mon profil</h2>
+        <form id="candidate-profile-form">
+          <label for="candidate-name">Nom affiché</label><input id="candidate-name" maxlength="80" required autocomplete="name">
+          <label for="candidate-email">Adresse e-mail de connexion</label><input id="candidate-email" type="email" readonly>
+          <button type="submit" id="save-candidate-profile">Enregistrer</button>
+          <p id="candidate-profile-status" role="status"></p>
+        </form>
+      </section>
+      <p id="candidate-form-unavailable" class="card dashboard-panel" hidden></p>
+    </div>
+    <div id="portal-cases"></div>
+  </main>
+  <main id="general-workflow" hidden>
+    <form id="general-form" class="card intake-form" novalidate>
+      <div class="intake-heading">
+        <h2>Mon projet d’immigration</h2>
+        <p>Préparez votre dossier avant de le transmettre à un consultant.</p>
+      </div>
+      <ol class="intake-progress" aria-label="Progression du dossier">
+        <li aria-current="step">Projet</li><li>Situation</li><li>Pièces</li><li>Récapitulatif</li>
+      </ol>
+      <div class="intake-body">
+      <section class="intake-step">
+      <h3>Où souhaitez-vous partir ?</h3>
+      <div class="fields">
+        <div><label for="intake-country">Destination</label><select id="intake-country" required></select></div>
+        <div><label for="intake-purpose">Motif du séjour</label><select id="intake-purpose" required></select></div>
+      </div>
+      <p id="intake-source" class="muted"></p>
+      <button id="study-path" type="button" class="portal-secondary" hidden>Ouvrir le parcours détaillé des études au Canada</button>
+      <label for="intake-date">Date de départ envisagée</label><input id="intake-date" type="date">
+      </section>
+      <section class="intake-step" hidden>
+      <h3>Votre situation et votre projet</h3>
+      <p class="muted">Renseignez les éléments connus. Vous pourrez préciser le reste avec votre consultant.</p>
+      <div class="fields" id="intake-common-fields"></div>
+      <div class="fields" id="intake-purpose-fields"></div>
+      <label for="intake-description">Décrivez votre projet</label>
+      <textarea id="intake-description" required maxlength="2500" placeholder="Indiquez les démarches déjà faites et les points à éclaircir."></textarea>
+      </section>
+      <section class="intake-step" hidden>
+      <h3>Vos pièces justificatives</h3>
+      <p class="notice">Utilisez des informations et des pièces fictives pour cette démonstration.</p>
+      <p class="muted">Choisissez le type de pièce, puis son fichier. PDF, DOCX, JPG ou PNG. Les photos utilisent le format JPG ou PNG. Jusqu’à trois pièces de 4 Mio par envoi.</p>
+      <div id="intake-files"></div>
+      <button id="add-intake-file" type="button" class="portal-secondary">Ajouter une pièce</button>
+      </section>
+      <section class="intake-step" hidden>
+        <h3>Vérifiez avant de transmettre</h3>
+        <div id="intake-summary"></div>
+      </section>
+      <div class="intake-navigation">
+        <button id="intake-previous" type="button" class="portal-secondary" hidden>← Retour</button>
+        <button id="intake-next" type="button">Continuer →</button>
+        <button id="intake-submit" type="submit" hidden>Transmettre au consultant</button>
+      </div>
+      <p id="intake-status" role="status"></p>
+      </div>
+    </form>
+  </main>
+  <main id="candidate-workflow" hidden>
+    <button type="button" class="portal-secondary" id="back-to-intake">← Revenir au projet d’immigration</button>
     <p class="notice"><strong>Prototype de démonstration.</strong> Les résultats sont indicatifs : ils ne constituent pas un avis juridique et ne garantissent aucune décision d’IRCC. Les informations déclarées ici ne sont pas vérifiées.</p>
     <div class="layout">
-      <form class="card" id="demo-form">
-        <h2>Question et profil</h2>
+      <form class="card" id="demo-form" autocomplete="off">
+        <h2>Mon dossier de permis d’études</h2>
+        <details>
+          <summary>Poser une question à l’assistant (facultatif)</summary>
         <label for="question">Votre question</label>
-        <textarea id="question" minlength="3" maxlength="1000" required placeholder="Ex. Quels documents dois-je fournir pour ma demande ?"></textarea>
+        <textarea id="question" minlength="3" maxlength="1000" placeholder="Ex. Quels documents dois-je fournir pour ma demande ?"></textarea>
         <p class="muted">La réponse s’appuie sur les passages disponibles dans le corpus ; en cas de doute, l’assistant s’abstient.</p>
-        <h3>Informations du profil</h3>
+        </details>
+        <h3>1. Mon projet d’études</h3>
         <div class="fields">
           <div>
             <label for="province">Province de destination</label>
@@ -115,10 +277,20 @@
             <label for="application-date">Date prévue de demande</label>
             <input id="application-date" type="date">
           </div>
-          <div>
-            <label for="family-size">Taille de la famille</label>
-            <input id="family-size" type="number" min="1" step="1">
-          </div>
+        </div>
+        <h3>2. Mon budget</h3>
+        <p class="muted">Le calcul additionne les frais de séjour, la scolarité et le trajet aller-retour.</p>
+        <label for="travel-party">Qui part au Canada avec vous ?</label>
+        <select id="travel-party">
+          <option value="">À préciser</option><option value="alone">Je pars seul(e)</option>
+          <option value="accompanied">Je pars avec un ou plusieurs proches</option>
+        </select>
+        <div id="companions-group" hidden>
+          <label for="companions">Nombre de proches qui vous accompagnent</label>
+          <input id="companions" type="number" min="1" max="1000" step="1" disabled aria-describedby="companions-help">
+          <p class="muted" id="companions-help">Comptez seulement les proches qui vous accompagnent. Si vous partez avec un conjoint et un enfant, saisissez 2. Vous êtes ajouté au total.</p>
+        </div>
+        <div class="fields">
           <div>
             <label for="funds">Fonds disponibles (CAD)</label>
             <input id="funds" type="number" min="0" step="0.01">
@@ -128,14 +300,35 @@
             <input id="tuition" type="number" min="0" step="0.01">
           </div>
           <div>
-            <label for="transport">Transport (CAD)</label>
-            <input id="transport" type="number" min="0" step="0.01">
+            <label for="transport">Trajet aller-retour vers le Canada (CAD)</label>
+            <input id="transport" type="number" min="0" step="0.01" aria-describedby="transport-help">
+            <p class="muted" id="transport-help">Estimez le total des billets pour vous et les proches qui vous accompagnent. Laissez vide si le coût est inconnu.</p>
           </div>
         </div>
-        <button id="submit" type="submit">Analyser la demande</button>
+        <details>
+          <summary>Vérifications complémentaires</summary>
+          <p class="muted">Consultez les sources de la checklist avant d’indiquer qu’une étape ne s’applique pas.</p>
+          <div class="fields" id="document-checks"></div>
+        </details>
+        <h3>3. Mes pièces fictives</h3>
+        <p class="muted">Spécimens à télécharger en TXT ou en PDF scanné.</p>
+        <ul>
+          <li>Lettre d’acceptation · <a href="/dossier/specimens/acceptance">TXT</a> · <a href="/dossier/specimens/acceptance?format=pdf">PDF</a></li>
+          <li>Relevé de notes · <a href="/dossier/specimens/transcript">TXT</a> · <a href="/dossier/specimens/transcript?format=pdf">PDF</a></li>
+          <li>Justificatif financier · <a href="/dossier/specimens/financial">TXT</a> · <a href="/dossier/specimens/financial?format=pdf">PDF</a></li>
+        </ul>
+        <label for="document-type">Type de pièce</label>
+        <select id="document-type"><option value="acceptance">Lettre d’acceptation</option><option value="transcript">Relevé de notes</option><option value="financial">Justificatif financier</option></select>
+        <label for="document-file">Fichier à lire</label>
+        <input id="document-file" type="file" accept=".pdf,.txt,application/pdf,text/plain">
+        <p class="muted">PDF ou TXT UTF-8, 2 Mio maximum. Utilisez uniquement les spécimens fictifs.</p>
+        <button id="read-document" type="button">Lire la pièce</button>
+        <p id="document-status" role="status"></p>
+        <div id="review-documents"></div>
+        <button id="submit" type="submit">4. Analyser mon dossier</button>
       </form>
       <section class="card" aria-live="polite" aria-busy="false" id="results">
-        <h2>Résultats</h2>
+        <h2>Brouillon du dossier</h2>
         <p class="empty" id="initial">Remplissez le formulaire pour afficher la réponse sourcée, les verdicts et la checklist.</p>
         <div id="error" class="error" hidden></div>
         <section class="result" id="answer-section" hidden>
@@ -150,6 +343,12 @@
         <section class="result" id="checklist-section" hidden>
           <h3>Pièces et informations à suivre</h3>
           <div id="checklist"></div>
+        </section>
+        <section class="result" id="review-section" hidden>
+          <h3>Vérification des pièces</h3>
+          <div id="review-summary"></div>
+          <button id="validate-draft" type="button" disabled>Valider le brouillon</button>
+          <p id="draft-status" role="status"></p>
         </section>
       </section>
     </div>
@@ -214,7 +413,7 @@
         showText(row, "span", verdictLabels[item.verdict] || item.verdict, color);
         showText(row, "strong", item.title);
         showText(row, "p", item.explanation);
-        if (item.missing_inputs.length) showText(row, "p", `Informations manquantes : ${item.missing_inputs.join(", ")}`, "muted");
+        if (item.missing_inputs.length) showText(row, "p", "À confirmer · " + item.missing_inputs.map(name => fieldLabels[name] ?? name).join(", "), "muted");
         target.append(row);
       }
       showText(target, "p", report.disclaimer, "muted");
@@ -231,7 +430,7 @@
         showText(row, "span", checklistLabels[item.status] || item.status, color);
         showText(row, "strong", item.title);
         showText(row, "p", item.message);
-        if (item.missing_inputs.length) showText(row, "p", `À renseigner : ${item.missing_inputs.join(", ")}`, "muted");
+        if (item.missing_inputs.length) showText(row, "p", "À renseigner · " + item.missing_inputs.map(name => fieldLabels[name] ?? name).join(", "), "muted");
         for (const url of item.source_urls) {
           const link = document.createElement("a");
           link.href = url;
@@ -244,6 +443,151 @@
       }
     }
 
+    const documentLabels = { acceptance: "Lettre d’acceptation", transcript: "Relevé de notes", financial: "Justificatif financier" };
+    const checkLabels = {"identity":"Justificatifs d’identité","medical":"Examen médical","police":"Certificat de police","biometrics":"Biométrie","local_documents":"Pièces demandées par le bureau des visas"};
+    const fieldLabels = {
+      ...checkLabels, candidate_name: "Nom", institution: "Établissement", program: "Programme",
+      start_date: "Date de début", end_date: "Date de fin", study_period: "Période d’études",
+      account_holder: "Titulaire", amount: "Montant", currency: "Devise", issue_date: "Date d’émission",
+      destination_province: "Province de destination", family_size: "Personnes qui partent au Canada",
+      transport_cost_cad: "Trajet aller-retour (CAD)", funds_available_cad: "Fonds disponibles (CAD)",
+      level_of_study: "Niveau d’études", has_letter_of_acceptance: "Lettre d’acceptation",
+      pal_provided: "PAL/TAL", caq_provided: "CAQ", dli_is_public: "Statut public de l’établissement",
+      application_date: "Date prévue de demande", tuition_first_year_cad: "Scolarité première année (CAD)"
+    };
+    const documents = [];
+    const travelParty = document.querySelector("#travel-party");
+    const companions = document.querySelector("#companions");
+    const validateDraft = document.querySelector("#validate-draft");
+    const draftStatus = document.querySelector("#draft-status");
+    const checkFields = document.querySelector("#document-checks");
+    let revision = 0;
+
+    for (const [name, title] of Object.entries(checkLabels)) {
+      const field = document.createElement("div");
+      const select = document.createElement("select");
+      select.id = "check-" + name;
+      showText(field, "label", title).htmlFor = select.id;
+      select.append(new Option("À vérifier", ""), new Option("Terminé", "ready"), new Option("À compléter", "missing"));
+      if (name !== "identity") select.append(new Option("Non applicable après vérification", "not_required"));
+      field.append(select);
+      checkFields.append(field);
+    }
+
+    function updateTravelParty() {
+      const accompanied = travelParty.value === "accompanied";
+      document.querySelector("#companions-group").hidden = !accompanied;
+      companions.disabled = !accompanied;
+    }
+    travelParty.addEventListener("change", updateTravelParty);
+    updateTravelParty();
+
+    function invalidateDraft() {
+      revision += 1;
+      validateDraft.disabled = true;
+      draftStatus.textContent = "Le dossier a changé. Relancez l’analyse.";
+    }
+    form.addEventListener("input", invalidateDraft);
+    let reviewedDossier = null;
+    validateDraft.textContent = "Transmettre au consultant";
+    validateDraft.addEventListener("click", async () => {
+      const submission = reviewedDossier;
+      if (!submission || submission.revision !== revision) return;
+      validateDraft.disabled = true;
+      try {
+        await post("/portal/cases", submission.payload);
+        draftStatus.textContent = "Dossier transmis.";
+        await window.portalRefresh();
+      } catch (error) {
+        draftStatus.textContent = error.message;
+        validateDraft.disabled = submission.revision !== revision;
+      }
+    });
+
+    async function post(path, body, mediaType = "application/json") {
+      const response = await fetch(path, { method: "POST", headers: { "Content-Type": mediaType }, body });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(typeof payload.detail === "string" ? payload.detail : "Erreur de l’API (" + response.status + ").");
+      return payload;
+    }
+
+    function renderDocuments() {
+      const target = document.querySelector("#review-documents");
+      target.replaceChildren();
+      for (const [index, piece] of documents.entries()) {
+        const section = document.createElement("section");
+        section.className = "item";
+        showText(section, "h3", (index + 1) + ". " + documentLabels[piece.document_type]);
+        for (const field of piece.fields) {
+          const input = document.createElement("input");
+          input.id = piece.document_id + "-" + field.field_name;
+          input.maxLength = 160;
+          input.value = field.value ?? "";
+          input.placeholder = "Champ absent ou ambigu";
+          showText(section, "label", fieldLabels[field.field_name]).htmlFor = input.id;
+          section.append(input);
+          const confirm = document.createElement("input");
+          confirm.type = "checkbox";
+          confirm.style.width = "auto";
+          confirm.checked = field.reviewed_by_human;
+          confirm.disabled = !field.value;
+          confirm.setAttribute("aria-label", "Confirmer " + fieldLabels[field.field_name]);
+          const confirmationLabel = document.createElement("label");
+          confirmationLabel.append(confirm, " Confirmer le champ");
+          section.append(confirmationLabel);
+          if (field.page) {
+            const source = field.confidence === null ? "Texte extrait" : "Texte lu sur le scan";
+            showText(section, "small", source + " · page " + field.page, "muted");
+          }
+          input.addEventListener("input", () => {
+            field.value = input.value.trim() || null;
+            field.reviewed_by_human = false;
+            confirm.checked = false;
+            confirm.disabled = !field.value;
+          });
+          confirm.addEventListener("change", () => { field.reviewed_by_human = confirm.checked; });
+        }
+        const remove = showText(section, "button", "Retirer la pièce");
+        remove.type = "button";
+        remove.addEventListener("click", () => {
+          documents.splice(index, 1);
+          invalidateDraft();
+          renderDocuments();
+        });
+        target.append(section);
+      }
+    }
+
+    const readDocument = document.querySelector("#read-document");
+    readDocument.addEventListener("click", async () => {
+      const fileInput = document.querySelector("#document-file");
+      const file = fileInput.files[0];
+      const status = document.querySelector("#document-status");
+      if (!file || documents.length >= 6 || file.size > 2 * 1024 * 1024) {
+        status.textContent = "Sélectionnez un fichier de 2 Mio maximum. Le dossier peut contenir jusqu’à six pièces.";
+        return;
+      }
+      const typeInput = document.querySelector("#document-type");
+      const mediaType = { pdf: "application/pdf", txt: "text/plain" }[file.name.split(".").pop().toLowerCase()];
+      if (!mediaType) {
+        status.textContent = "Choisissez un fichier PDF ou TXT.";
+        return;
+      }
+      readDocument.disabled = fileInput.disabled = typeInput.disabled = true;
+      status.textContent = "Lecture en cours…";
+      try {
+        documents.push(await post("/dossier/documents/" + typeInput.value, file, mediaType));
+        fileInput.value = "";
+        renderDocuments();
+        invalidateDraft();
+        status.textContent = "Vérifiez les champs et confirmez-les après correction.";
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        readDocument.disabled = fileInput.disabled = typeInput.disabled = false;
+      }
+    });
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const error = document.querySelector("#error");
@@ -252,6 +596,10 @@
       results.setAttribute("aria-busy", "true");
       submit.disabled = true;
       submit.textContent = "Analyse en cours…";
+      validateDraft.disabled = true;
+      draftStatus.textContent = "";
+      const submittedRevision = revision;
+      const companionCount = optionalNumber("companions");
 
       const profile = {
         destination_province: document.querySelector("#province").value || null,
@@ -261,39 +609,60 @@
         caq_provided: optionalBoolean("caq"),
         dli_is_public: optionalBoolean("public-dli"),
         application_date: document.querySelector("#application-date").value || null,
-        family_size: optionalNumber("family-size"),
+        family_size: travelParty.value === "alone" ? 1 :
+          travelParty.value === "accompanied" && companionCount !== null ? companionCount + 1 : null,
         funds_available_cad: optionalNumber("funds"),
         tuition_first_year_cad: optionalNumber("tuition"),
         transport_cost_cad: optionalNumber("transport")
       };
 
       try {
-        const requests = await Promise.all([
-          fetch("/ask", { method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: document.querySelector("#question").value }) }),
-          fetch("/assess", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) }),
-          fetch("/checklist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profile) })
-        ]);
-        const failed = requests.find((response) => !response.ok);
-        if (failed) throw new Error(`L’API a répondu avec le statut ${failed.status}. Consultez /docs pour diagnostiquer le problème.`);
-        const [answer, assessment, checklist] = await Promise.all(requests.map((response) => response.json()));
-
-        document.querySelector("#answer-section").hidden = false;
-        document.querySelector("#answer-text").textContent = answer.answered ? answer.answer : answer.abstention_reason;
-        addSources(document.querySelector("#sources"), answer.evidence);
+        const question = document.querySelector("#question").value.trim();
+        const document_checks = Object.fromEntries(Object.keys(checkLabels)
+          .map(name => [name, document.querySelector("#check-" + name).value]).filter(([, status]) => status));
+        const payload = JSON.stringify({ profile, documents, document_checks });
+        const report = await post("/dossier/report", payload);
+        if (submittedRevision !== revision) throw new Error("Le dossier a changé pendant l’analyse. Relancez-la.");
         document.querySelector("#assessment-section").hidden = false;
-        renderAssessment(assessment);
+        renderAssessment(report.assessment);
         document.querySelector("#checklist-section").hidden = false;
-        renderChecklist(checklist);
+        renderChecklist(report.checklist);
+        document.querySelector("#review-section").hidden = false;
+        const summary = document.querySelector("#review-summary");
+        summary.replaceChildren();
+        if (!documents.length) showText(summary, "p", "Ajoutez un spécimen pour vérifier les pièces.");
+        if (report.pending_fields) showText(summary, "p", "Champs à confirmer · " + report.pending_fields);
+        if (report.funds_from_documents_cad !== null) {
+          const amount = report.funds_from_documents_cad.toLocaleString("fr-FR", { style: "currency", currency: "CAD" });
+          showText(summary, "p", "Fonds utilisés pour le calcul · " + amount + ", d’après le justificatif confirmé.");
+        }
+        for (const conflict of report.contradictions) {
+          const indexes = conflict.document_ids.map(id => documents.findIndex(piece => piece.document_id === id) + 1);
+          showText(summary, "p", conflict.message + " Pièce(s) " + indexes.join(", ") + ".", "error");
+        }
+        if (report.can_validate) showText(summary, "p", "Champs confirmés. Aucune incohérence détectée.");
+        validateDraft.disabled = !report.can_validate;
+        reviewedDossier = report.can_validate ? { revision: submittedRevision, payload } : null;
+        const answerSection = document.querySelector("#answer-section");
+        answerSection.hidden = true;
+        if (question) {
+          const answer = await post("/ask", JSON.stringify({ question }));
+          if (submittedRevision === revision) {
+            answerSection.hidden = false;
+            document.querySelector("#answer-text").textContent = answer.answered ? answer.answer : answer.abstention_reason;
+            addSources(document.querySelector("#sources"), answer.evidence);
+          }
+        }
       } catch (reason) {
         error.textContent = reason instanceof Error ? reason.message : "Une erreur inattendue est survenue.";
         error.hidden = false;
       } finally {
         results.setAttribute("aria-busy", "false");
         submit.disabled = false;
-        submit.textContent = "Analyser la demande";
+        submit.textContent = "4. Analyser mon dossier";
       }
     });
   </script>
+  <script src="./portal.js" defer></script>
 </body>
 </html>
