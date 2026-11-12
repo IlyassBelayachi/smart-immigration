@@ -32,6 +32,11 @@ Le prototype local permet à un candidat fictif de préparer un dossier d’immi
 
 ## Historique
 
+### 12 novembre 2026 — Relance de la démo
+
+- Le serveur local était arrêté. Après relance, la page de démo répond avec un statut HTTP 200 et l’API de sauvegarde du brouillon est disponible.
+- Prochaine vérification. Reprendre un brouillon après reconnexion depuis le navigateur.
+
 ### 12 novembre 2026 — Brouillon du formulaire général
 
 - Le candidat peut enregistrer les réponses de son formulaire multi-pays, puis les reprendre après reconnexion. Le brouillon est lié au compte, accessible au candidat et supprimé lors d’une transmission réussie.
