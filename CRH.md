@@ -32,6 +32,13 @@ Le prototype local permet à un candidat fictif de préparer un dossier d’immi
 
 ## Historique
 
+### 12 novembre 2026 — Brouillon du formulaire général
+
+- Le candidat peut enregistrer les réponses de son formulaire multi-pays, puis les reprendre après reconnexion. Le brouillon est lié au compte, accessible au candidat et supprimé lors d’une transmission réussie.
+- Les pièces sélectionnées restent dans le formulaire ouvert. Après reconnexion, elles doivent être sélectionnées à nouveau.
+- 46 tests réussis, dont l’isolation du brouillon par compte et sa suppression après transmission. Syntaxe JavaScript et diff vérifiés. La reprise dans le navigateur reste à valider.
+- Prochaine action. Publier la branche de la partie Dossier, puis rejouer le parcours complet côté candidat et consultant.
+
 ### 11 novembre 2026 — Accueil Consultant
 
 - Ajout d’un tableau de bord pour les consultants connectés. Il compte les dossiers accessibles à examiner, en attente de complément et clôturés. Les cartes filtrent la liste qui donne accès au rapport et aux actions.

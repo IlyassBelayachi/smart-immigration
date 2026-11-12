@@ -46,6 +46,9 @@ def database():
             CREATE TABLE IF NOT EXISTS account_identity (
                 account_id INTEGER PRIMARY KEY, cin TEXT NOT NULL, passport TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS intake_drafts (
+                account_id INTEGER PRIMARY KEY, payload TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS case_files (
                 id INTEGER PRIMARY KEY, case_id INTEGER NOT NULL, kind TEXT NOT NULL,
                 filename TEXT NOT NULL, media_type TEXT NOT NULL, content BLOB NOT NULL
@@ -215,6 +218,7 @@ def submit_case(account: dict, payload: str, files: list[tuple[str, str, str, by
             )
         db.execute("INSERT INTO case_events (case_id, author_id, action) VALUES (?, ?, 'submitted')",
                    (case_id, account["id"]))
+        db.execute("DELETE FROM intake_drafts WHERE account_id = ?", (account["id"],))
     return {"id": case_id, "status": "submitted"}
 
 

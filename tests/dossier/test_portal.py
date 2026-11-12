@@ -85,10 +85,17 @@ def test_general_intake_persists_files_and_limits_download_access(tmp_path, monk
     file = {"kind": "photo", "filename": "portrait-specimen.png", "data": b64encode(content).decode()}
     body = {"destination": "FR", "purpose": "work", "description": "Projet fictif", "files": [file],
             "details": {"occupation": "Développeur", "residence": "Rabat, Maroc"}}
+    draft = {key: value for key, value in body.items() if key != "files"}
+    assert candidate.post("/portal/intake/draft", json=draft).status_code == 200
+    assert candidate.get("/portal/intake/draft").json()["details"] == draft["details"]
+    assert outsider.get("/portal/intake/draft").json() is None
+    assert reviewer.get("/portal/intake/draft").status_code == 403
     assert outsider.post("/portal/intake", json={**body, "purpose": "study"}).status_code == 422
     assert outsider.post("/portal/intake", json={**body, "destination": "XX"}).status_code == 422
     assert outsider.post("/portal/intake", json={**body, "files": [{**file, "data": "YmFk"}]}).status_code == 422
     assert candidate.post("/portal/intake", json=body).status_code == 201
+    assert candidate.get("/portal/intake/draft").json() is None
+    assert candidate.post("/portal/intake/draft", json=draft).status_code == 409
     record = reviewer.get("/portal/cases").json()["cases"][0]
     assert "Développeur" in record["payload"]
     file_url = f"/portal/cases/{record['id']}/files/{record['files'][0]['id']}"

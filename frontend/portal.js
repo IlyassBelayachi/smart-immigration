@@ -377,13 +377,7 @@ window.portalRefresh = async function () {
       if (detailedStudy) {
         restoreCandidateDossier(dossier);
       } else {
-        element("intake-country").value = dossier.destination;
-        element("intake-purpose").value = dossier.purpose;
-        element("intake-date").value = dossier.planned_date ?? "";
-        element("intake-description").value = dossier.description;
-        updateIntakeSource();
-        for (const input of activeIntakeInputs()) input.value = dossier.details?.[input.name] ?? "";
-        setIntakeStep(0);
+        restoreIntakeDraft(dossier);
       }
       loadedCase = record.id;
     }
@@ -481,6 +475,16 @@ async function openWorkspace(user) {
   try {
     await loadIntakeCatalog();
     await window.portalRefresh();
+    if (isCandidate && !detailedStudy && (!candidateRecord || candidateRecord.status === "needs_changes")) {
+      const response = await fetch("/portal/intake/draft", { cache: "no-store" });
+      if (!response.ok) throw new Error("Impossible de charger le brouillon.");
+      const draft = await response.json();
+      if (draft) {
+        restoreIntakeDraft(draft);
+        element("candidate-primary").textContent = "Reprendre mon brouillon";
+        element("candidate-primary").dataset.candidateView = "form";
+      }
+    }
   } catch (error) {
     element("workspace-status").textContent = error.message;
   }
@@ -566,6 +570,30 @@ function intakeDraft() {
     details: Object.fromEntries([...activeIntakeInputs()].map(input => [input.name, input.value.trim()]).filter(([, value]) => value))
   };
 }
+
+function restoreIntakeDraft(draft) {
+  element("intake-country").value = draft.destination;
+  element("intake-purpose").value = draft.purpose;
+  element("intake-date").value = draft.planned_date ?? "";
+  element("intake-description").value = draft.description;
+  updateIntakeSource();
+  for (const input of activeIntakeInputs()) input.value = draft.details?.[input.name] ?? "";
+  setIntakeStep(0);
+}
+
+const saveIntake = element("intake-save");
+saveIntake.addEventListener("click", async () => {
+  const status = element("intake-status");
+  saveIntake.disabled = true;
+  try {
+    await post("/portal/intake/draft", JSON.stringify(intakeDraft()));
+    status.textContent = "Brouillon enregistré. Sélectionnez de nouveau les pièces après une reconnexion.";
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    saveIntake.disabled = false;
+  }
+});
 
 function setIntakeStep(step, focus = false) {
   intakeStep = step;

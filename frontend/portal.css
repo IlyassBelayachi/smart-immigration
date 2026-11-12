@@ -66,7 +66,7 @@
 .intake-step h3 { margin: .7rem 0 .5rem; font-size: 1.25rem; color: #532435; }
 .intake-step .purpose-group[hidden] { display: none; }
 .intake-step #intake-purpose-fields { display: block; }
-.intake-navigation { display: flex; justify-content: space-between; gap: .6rem; margin-top: .8rem; }
+.intake-navigation { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .6rem; margin-top: .8rem; }
 #intake-next, #intake-submit { margin-left: auto; background: var(--portal-accent); }
 .intake-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .6rem; padding: .8rem; background: #fff7f4; border-radius: 10px; }
 .intake-summary:empty { display: none; }

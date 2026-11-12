@@ -79,6 +79,44 @@ class Intake(BaseModel):
     files: list[Attachment] = Field(default_factory=list, max_length=3)
 
 
+class IntakeDraft(BaseModel):
+    destination: str = Field(default="", max_length=2)
+    purpose: str = Field(default="", max_length=12)
+    planned_date: date | None = None
+    description: str = Field(default="", max_length=2500)
+    details: dict[str, str] = Field(default_factory=dict, max_length=10)
+
+
+@router.get("/intake/draft")
+def get_draft(account: dict = Depends(current_account)):
+    if account["role"] != "candidate":
+        raise HTTPException(403, "Cette action est réservée aux candidats.")
+    with database() as db:
+        draft = db.execute("SELECT payload FROM intake_drafts WHERE account_id = ?", (account["id"],)).fetchone()
+    return json.loads(draft["payload"]) if draft else None
+
+
+@router.post("/intake/draft")
+def save_draft(draft: IntakeDraft, account: dict = Depends(current_account)):
+    if account["role"] != "candidate":
+        raise HTTPException(403, "Cette action est réservée aux candidats.")
+    if draft.destination and draft.destination not in {country[0] for country in COUNTRIES}:
+        raise HTTPException(422, "Destination inconnue.")
+    if draft.purpose and draft.purpose not in PURPOSES:
+        raise HTTPException(422, "Motif inconnu.")
+    fields = COMMON_FIELDS.keys() | PURPOSE_FIELDS.get(draft.purpose, {}).keys()
+    if not draft.details.keys() <= fields or any(len(value) > 240 for value in draft.details.values()):
+        raise HTTPException(422, "Vérifiez les champs du brouillon.")
+    with database() as db:
+        db.execute("BEGIN IMMEDIATE")
+        case = db.execute("SELECT status FROM cases WHERE candidate_id = ?", (account["id"],)).fetchone()
+        if case and case["status"] != "needs_changes":
+            raise HTTPException(409, "Ce dossier a déjà été transmis.")
+        db.execute("INSERT INTO intake_drafts VALUES (?, ?) ON CONFLICT(account_id) DO UPDATE SET payload = excluded.payload",
+                   (account["id"], draft.model_dump_json()))
+    return {"saved": True}
+
+
 @router.get("/catalog")
 def catalog():
     return {
