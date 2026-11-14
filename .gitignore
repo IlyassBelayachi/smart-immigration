@@ -6,3 +6,5 @@ __pycache__/
 data/corpus/
 data/private/
 *.egg-info/
+.env
+data/private/

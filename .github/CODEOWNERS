@@ -9,6 +9,10 @@
 /data/seed/                         @PERSONNE_1
 /eval/knowledge/                    @PERSONNE_1
 
+# Comptes, BD, identité (Ilyass)
+/src/smart_immigration/accounts/  @PERSONNE_1
+/tests/accounts/                   @PERSONNE_1
+
 # Chaîne Dossier
 /src/smart_immigration/dossier/     @PERSONNE_2
 /tests/dossier/                     @PERSONNE_2
