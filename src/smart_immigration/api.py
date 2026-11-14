@@ -9,12 +9,14 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
+from .accounts.routes import router as accounts_router
 from .dossier.routes import router as dossier_router
 from .knowledge.routes import router as knowledge_router
 
 app = FastAPI(title="Smart Immigration Process", version="0.1.0")
 app.include_router(knowledge_router)
 app.include_router(dossier_router)
+app.include_router(accounts_router)
 
 
 @app.get("/", include_in_schema=False)

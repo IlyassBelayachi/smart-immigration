@@ -16,3 +16,13 @@ pypdf>=6.0
 pypdfium2>=4.30,<6
 rapidocr-onnxruntime>=1.4.4,<2
 Pillow>=10
+
+# --- Comptes, base de données, identité (Ilyass) ---
+sqlalchemy>=2.0
+argon2-cffi>=23.1
+PyJWT>=2.8
+python-multipart>=0.0.9
+opencv-python-headless>=4.9,<5
+opencv-python>=4.9,<5
+numpy>=1.26
+psycopg[binary]>=3.1
