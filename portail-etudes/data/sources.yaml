@@ -1,0 +1,88 @@
+# Sources officielles du corpus MVP : Canada, permis d'etudes (IRCC).
+# Chaque URL a ete ouverte et verifiee le 2026-11-10. `page_modified` = date "Page details" affichee par IRCC.
+# A COMPLETER par le binome (cible 30-50 pages) : voir backlog S1. Verifier les conditions de reutilisation avant collecte automatisee.
+country: CA
+pathway: study_permit
+language: en
+sources:
+  - source_id: ircc-sp-eligibility
+    title: "Study permit: Who can apply"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/eligibility.html
+    page_modified: "2026-01-26"
+    verified: true
+  - source_id: ircc-sp-pal
+    title: "Study permit: Provincial attestation letter or territorial attestation letter"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents/provincial-attestation-letter.html
+    page_modified: "2026-09-02"
+    verified: true
+  - source_id: ircc-sp-financial
+    title: "Study permit: Proof of financial support"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents/financial-support.html
+    page_modified: "2026-08-28"
+    verified: true
+  - source_id: ircc-sp-apply
+    title: "Study permit: How to apply"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/apply.html
+    page_modified: "2026-09-02"
+    verified: true
+  # Pages vues dans la navigation IRCC, URL confirmees mais contenu non encore relu (a verifier en S1) :
+  - source_id: ircc-sp-get-documents
+    title: "Study permit: Get the right documents"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    verified: false
+  - source_id: ircc-sp-after-apply
+    title: "Study permit: After you apply"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/after-apply-next-steps.html
+    verified: false
+  - source_id: ircc-sp-prepare-arrival
+    title: "Study permit: Prepare for your arrival"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/prepare-arrival.html
+    verified: false
+  - source_id: ircc-sp-while-you-study
+    title: "Study permit: While you study"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/while-you-study.html
+    verified: false
+  - source_id: ircc-sp-conditions
+    title: "Study permit conditions"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/while-you-study/study-permit-conditions.html
+    verified: false
+  - source_id: ircc-sp-guide-5269
+    title: "Guide 5269 - Applying for a study permit from outside Canada"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/guide-5269-applying-study-permit-outside-canada.html
+    verified: false
+  - source_id: ircc-sp-no-permit
+    title: "Study permit: Who doesn't need a permit"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/eligibility/study-without-permit.html
+    verified: false
+  - source_id: ircc-graduate-how-to-apply
+    title: "Graduate students: how to apply"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/graduate-student/how-to-apply.html
+    verified: false
+  - source_id: ircc-change-schools
+    title: "Change schools"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/change-schools.html
+    verified: false
+  - source_id: ircc-pgwp-eligibility
+    title: "PGWP eligibility"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/work/after-graduation/eligibility.html
+    verified: false
+  - source_id: ircc-biometrics-need
+    title: "Who needs to give biometrics"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/biometrics/need-biometrics.html
+    verified: false
+  - source_id: ircc-police-certificates
+    title: "Police certificates: how to get one"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/application/medical-police/police-certificates/how.html
+    verified: false
+  - source_id: ircc-medical-exams
+    title: "Medical exam requirements for temporary residents"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/application/medical-police/medical-exams/requirements-temporary-residents.html
+    verified: false
+  - source_id: ircc-dli-list
+    title: "Designated learning institutions list"
+    url: https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/prepare/designated-learning-institutions-list.html
+    verified: false
+  - source_id: quebec-caq
+    title: "Quebec: obtaining authorizations (CAQ)"
+    url: https://www.quebec.ca/en/education/study-quebec/obtaining-authorizations/authorizations
+    verified: false

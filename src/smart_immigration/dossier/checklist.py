@@ -15,7 +15,7 @@ def build_checklist(profile: ApplicantProfile, report: AssessmentReport) -> Chec
 
     for result in report.results:
         if result.rule_id == "CA-SP-003" and profile.destination_province:
-            if profile.destination_province.upper() == "QC":
+            if profile.destination_province.strip().upper() == "QC":
                 items.append(
                     ChecklistItem(
                         rule_id=result.rule_id,
@@ -29,7 +29,10 @@ def build_checklist(profile: ApplicantProfile, report: AssessmentReport) -> Chec
 
         if result.verdict == Verdict.MEETS:
             status = "declared"
-            message = "Declare comme disponible dans le profil ; le document n'a pas ete verifie."
+            message = (
+                "Declare comme disponible dans le profil ; le document n'a pas ete verifie."
+                if result.rule_id == "CA-SP-001" else result.explanation
+            )
         elif result.verdict == Verdict.DOES_NOT_MEET:
             status = "to_provide"
             message = result.explanation

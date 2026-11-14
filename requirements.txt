@@ -12,3 +12,7 @@ beautifulsoup4>=4.12
 pyyaml>=6.0
 
 # --- Chaîne Dossier (Personne 2) ---
+pypdf>=6.0
+pypdfium2>=4.30,<6
+rapidocr-onnxruntime>=1.4.4,<2
+Pillow>=10

@@ -1,0 +1,6 @@
+SPÉCIMEN
+Justificatif fictif du total disponible
+Titulaire : Lina Exemple
+Montant : 45000.00
+Devise : CAD
+Date d’émission : 2026-11-10

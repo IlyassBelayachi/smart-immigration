@@ -6,13 +6,16 @@ from __future__ import annotations
 
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 
 from ..schemas import ApplicantProfile, AssessmentReport, RuleResult, Verdict
 
 RULES_PATH = Path(__file__).resolve().parents[3] / "rules" / "study_permit_ca.yaml"
+FEDERAL_PROVINCES = frozenset({"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "SK", "YT"})
+DocumentCheck = Literal["ready", "missing", "not_required"]
+DocumentCheckName = Literal["identity", "medical", "police", "biometrics", "local_documents"]
 
 
 def load_ruleset(path: Path | None = None) -> dict[str, Any]:
@@ -43,10 +46,11 @@ def _required_flag(rule: dict, p: ApplicantProfile, version: str) -> RuleResult:
 
 
 def _attestation_letter(rule: dict, p: ApplicantProfile, version: str) -> RuleResult:
-    if p.destination_province is None:
+    province = (p.destination_province or "").strip().upper()
+    if province not in FEDERAL_PROVINCES and province != rule["quebec_code"]:
         return _result(rule, version, Verdict.UNKNOWN, "Province de destination inconnue.", ["destination_province"])
 
-    if p.destination_province.upper() == rule["quebec_code"]:
+    if province == rule["quebec_code"]:
         # Au Quebec, le CAQ est requis meme pour la plupart des etudiants exemptes de PAL.
         if p.caq_provided is None:
             return _result(rule, version, Verdict.UNKNOWN, "Etudes au Quebec : CAQ requis, statut non renseigne.", ["caq_provided"])
@@ -85,13 +89,16 @@ def _living_expenses(table: dict, family_size: int) -> float:
 
 
 def _funds_threshold(rule: dict, p: ApplicantProfile, version: str) -> RuleResult:
+    province = (p.destination_province or "").strip().upper()
     missing = [
         name
         for name in ("application_date", "family_size", "funds_available_cad", "tuition_first_year_cad", "transport_cost_cad")
         if getattr(p, name) is None
     ]
-    if p.destination_province and p.destination_province.upper() == "QC":
+    if province == "QC":
         return _result(rule, version, Verdict.UNKNOWN, "Quebec : les couts sont fixes par le ministere quebecois (MIFI), hors du bareme federal encode ici.", [])
+    if province not in FEDERAL_PROVINCES:
+        missing.insert(0, "destination_province")
     if missing:
         return _result(rule, version, Verdict.UNKNOWN, "Donnees insuffisantes pour calculer le montant requis.", missing)
 
@@ -126,8 +133,29 @@ EVALUATORS = {
 }
 
 
-def assess(profile: ApplicantProfile, ruleset: dict[str, Any] | None = None) -> AssessmentReport:
+def _document_check(rule: dict, status: DocumentCheck | None, version: str) -> RuleResult:
+    instruction = rule["instruction"]
+    if status == "ready":
+        return _result(rule, version, Verdict.MEETS, "Étape déclarée terminée. " + instruction)
+    if status == "missing":
+        return _result(rule, version, Verdict.DOES_NOT_MEET, "Étape déclarée à compléter. " + instruction)
+    if status == "not_required" and rule["conditional"]:
+        return _result(rule, version, Verdict.MEETS, "Étape déclarée non applicable après vérification de la source.")
+    return _result(rule, version, Verdict.UNKNOWN, instruction, [rule["field"]])
+
+
+def assess(
+    profile: ApplicantProfile,
+    ruleset: dict[str, Any] | None = None,
+    *,
+    document_checks: dict[DocumentCheckName, DocumentCheck] | None = None,
+) -> AssessmentReport:
     ruleset = ruleset or load_ruleset()
     version = ruleset["version"]
     results = [EVALUATORS[r["type"]](r, profile, version) for r in ruleset["rules"]]
+    if document_checks is not None:
+        results.extend(
+            _document_check(rule, document_checks.get(rule["field"]), version)
+            for rule in ruleset.get("document_checks", [])
+        )
     return AssessmentReport(pathway=ruleset["pathway"], rule_version=version, results=results)

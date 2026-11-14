@@ -2,7 +2,7 @@
 # Chaque regle cite sa source IRCC et la date "Page details" lue le 2026-11-10.
 # Les montants/dates DOIVENT etre reverifies sur la page officielle avant la demo finale (les regles changent).
 pathway: study_permit_CA
-version: "2026-11-10"
+version: "2026-11-11"
 rules:
   - id: CA-SP-001
     type: required_flag
@@ -39,3 +39,50 @@ rules:
         extra_member: 6318
     source_urls:
       - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents/financial-support.html
+
+document_checks:
+  - id: CA-SP-004
+    field: identity
+    title: Justificatifs d’identité
+    conditional: false
+    instruction: Vérifiez les documents de voyage et photos demandés pour chaque personne concernée.
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    source_updated: "2026-10-06"
+    source_reviewed: "2026-11-11"
+  - id: CA-SP-005
+    field: medical
+    title: Examen médical
+    conditional: true
+    instruction: Consultez les critères d’IRCC pour votre situation.
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    source_updated: "2026-10-06"
+    source_reviewed: "2026-11-11"
+  - id: CA-SP-006
+    field: police
+    title: Certificat de police
+    conditional: true
+    instruction: Vérifiez si IRCC ou votre bureau des visas demande un certificat.
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    source_updated: "2026-10-06"
+    source_reviewed: "2026-11-11"
+  - id: CA-SP-007
+    field: biometrics
+    title: Biométrie
+    conditional: true
+    instruction: Vérifiez les exemptions et la validité des données déjà fournies.
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/biometrics/who-needs-to-give.html
+    source_updated: "2026-07-09"
+    source_reviewed: "2026-11-11"
+  - id: CA-SP-008
+    field: local_documents
+    title: Pièces demandées par le bureau des visas
+    conditional: true
+    instruction: Consultez les instructions d’IRCC pour votre pays ou territoire de demande.
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    source_updated: "2026-10-06"
+    source_reviewed: "2026-11-11"

@@ -1,0 +1,14 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
+let source=fs.readFileSync(__dirname+'/../portail-etudes/frontend/simulation/app.js','utf8').split('async function startSimulation')[0];
+const ctx={localStorage:{getItem:()=>null,setItem:()=>{}},crypto:require('node:crypto').webcrypto,console,Date};vm.createContext(ctx);vm.runInContext(source,ctx);
+vm.runInContext(`render=()=>{};toast=()=>{};db={active:'test',accounts:[{id:'test',cases:[],notifications:[]}]};function make(status,i){let c={id:String(i),ref:'T'+i,status,history:[],reminders:[],created:new Date().toISOString()};user().cases.push(c);return c}`,ctx);
+const run=s=>vm.runInContext(s,ctx);
+run(`for(let i=0;i<9;i++)make('ready',i);for(let i=0;i<8;i++)authorize(String(i));`);
+assert.equal(run("count('sent')"),3);assert.equal(run("count('queued')"),5);
+run("authorize('8')");assert.equal(run("user().cases.find(c=>c.id==='8').status"),'ready');
+run("transition('0','approved')");assert.equal(run("count('sent')"),3);assert.equal(run("count('queued')"),4);assert.equal(run("user().cases.find(c=>c.id==='3').status"),'sent');
+run("user().cases=[];for(let i=0;i<11;i++){let c=make('ready',i);storeCase(c);c.storedAt=new Date(2025,0,i+1).toISOString();}");
+assert.equal(run("count('stored')"),10);assert.equal(run("user().cases.some(c=>c.id==='0')"),false);
+run("user().cases=[];let expired=make('stored','expired');expired.deadline='2020-01-01T00:00:00Z';reconcile()");assert.equal(run("count('cancelled')"),1);
+run("user().cases=[];for(let i=0;i<5;i++)make('submitted',i);make('draft',9);transition('9','submitted')");assert.equal(run("count('draft')"),1);
+console.log('Tests réussis : quotas, blocage de file, FIFO, libération de place, conservation et expiration.');
