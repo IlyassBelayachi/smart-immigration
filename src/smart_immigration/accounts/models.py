@@ -22,6 +22,9 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20))  # candidate | consultant
     # Candidats seulement : pending_identity -> verified | resubmit_requested
     identity_status: Mapped[str] = mapped_column(String(30), default="pending_identity")
+    cin_hash: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)  # unicité
+    cin_enc: Mapped[str | None] = mapped_column(Text, nullable=True)       # CIN chiffrée
+    passport_enc: Mapped[str | None] = mapped_column(Text, nullable=True)  # facultatif, ajouté plus tard
     failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)

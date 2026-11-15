@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -32,8 +32,24 @@ def audit(db: Session, user_id: int | None, action: str, detail: str = "") -> No
 
 
 def public(u: User) -> dict:
+    cin = security.decrypt(u.cin_enc) if u.cin_enc else None
     return {"id": u.id, "email": u.email, "full_name": u.full_name, "role": u.role,
-            "identity_status": u.identity_status if u.role == "candidate" else None}
+            "identity_status": u.identity_status if u.role == "candidate" else None,
+            "cin_masked": security.mask(cin) if cin else None, "has_passport": bool(u.passport_enc)}
+
+
+def clean_cin(value: str) -> str:
+    cin = security.normalize_id(value)
+    if not security.CIN_RE.match(cin):
+        raise ValueError("CIN invalide : 1 à 3 lettres suivies de 6 à 8 chiffres (ex. AB123456).")
+    return cin
+
+
+def clean_passport(value: str) -> str:
+    passport = security.normalize_id(value)
+    if not security.PASSPORT_RE.match(passport):
+        raise ValueError("Passeport invalide : 6 à 12 lettres ou chiffres, sans symboles.")
+    return passport
 
 
 def current_user(request: Request, db: Session = Depends(get_session)) -> User:
@@ -59,6 +75,17 @@ class RegisterBody(BaseModel):
     full_name: str = Field(min_length=1, max_length=120)
     role: Literal["candidate", "consultant"] = "candidate"
     invitation: str = Field(default="", max_length=128)
+    cin: str | None = Field(default=None, max_length=20)  # obligatoire pour un candidat
+
+    @model_validator(mode="after")
+    def check_cin(self):
+        if self.role == "candidate":
+            if not self.cin:
+                raise ValueError("La CIN est obligatoire pour créer un compte candidat.")
+            self.cin = clean_cin(self.cin)
+        else:
+            self.cin = None
+        return self
 
 
 class LoginBody(BaseModel):
@@ -75,7 +102,11 @@ def register(body: RegisterBody, db: Session = Depends(get_session)):
     email = body.email.strip().lower()
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(409, "Cette adresse est déjà utilisée.")
+    cin_hash = security.fingerprint(body.cin) if body.cin else None
+    if cin_hash and db.scalar(select(User).where(User.cin_hash == cin_hash)):
+        raise HTTPException(409, "Un compte existe déjà avec cette CIN.")
     user = User(email=email, full_name=body.full_name.strip(), role=body.role,
+                cin_hash=cin_hash, cin_enc=security.encrypt(body.cin) if body.cin else None,
                 password_hash=security.hash_password(body.password),
                 identity_status="pending_identity" if body.role == "candidate" else "n/a")
     db.add(user)
@@ -119,6 +150,29 @@ def me(user: User = Depends(current_user)):
     return public(user)
 
 
+class ProfileBody(BaseModel):
+    full_name: str | None = Field(default=None, min_length=1, max_length=120)
+    passport: str | None = Field(default=None, max_length=20)
+
+    @field_validator("passport")
+    @classmethod
+    def check_passport(cls, v):
+        return clean_passport(v) if v else None
+
+
+@router.patch("/auth/me")
+def update_profile(body: ProfileBody, user: User = Depends(current_user), db: Session = Depends(get_session)):
+    """Le candidat complète son profil. La CIN ne se change pas (liée à la vérification d'identité)."""
+    if body.full_name:
+        user.full_name = body.full_name.strip()
+    if body.passport:
+        if user.role != "candidate":
+            raise HTTPException(403, "Le passeport concerne les comptes candidats.")
+        user.passport_enc = security.encrypt(body.passport)
+    audit(db, user.id, "profile_update")
+    return public(user)
+
+
 # ---------- Vérification d'identité (agent) ----------
 async def _read_image(file: UploadFile) -> bytes:
     if file.content_type not in IMAGE_TYPES:
@@ -156,6 +210,12 @@ class RequestBody(BaseModel):
     motive: Literal["study", "work", "family", "skilled_work", "entrepreneur", "visit", "protection", "other"]
     destination: str = Field(pattern=r"^[A-Z]{2}$")
     profile: dict = Field(default_factory=dict)
+    passport: str | None = Field(default=None, max_length=20)  # facultatif, peut être ajouté ici
+
+    @field_validator("passport")
+    @classmethod
+    def check_passport(cls, v):
+        return clean_passport(v) if v else None
 
 
 def serialize(r: ImmigrationRequest) -> dict:
@@ -169,6 +229,8 @@ def serialize(r: ImmigrationRequest) -> dict:
 def create_request(body: RequestBody, user: User = Depends(require("candidate")), db: Session = Depends(get_session)):
     if user.identity_status != "verified":
         raise HTTPException(403, "Votre identité doit d'abord être vérifiée.")
+    if body.passport:
+        user.passport_enc = security.encrypt(body.passport)
     try:
         rec = recommend(body.motive, body.destination, body.profile)
     except ValueError as error:

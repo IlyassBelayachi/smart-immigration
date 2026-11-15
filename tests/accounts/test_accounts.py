@@ -20,7 +20,7 @@ def test_register_login_me_logout(client):
 
 
 def test_short_password_and_wrong_password(client):
-    r = client.post("/auth/register", json={"email": "b@example.com", "password": "court", "full_name": "B"})
+    r = client.post("/auth/register", json={"email": "b@example.com", "password": "court", "full_name": "B", "cin": "AB123456"})
     assert r.status_code == 422
     register(client, "b@example.com")
     assert login(client, "b@example.com", "mauvais-mot-de-passe").status_code == 401
@@ -113,3 +113,63 @@ def test_candidate_cannot_see_other_candidates_requests(client):
 def test_consultant_endpoints_closed_to_candidates(client):
     verified_candidate(client)
     assert client.get("/consultant/requests").status_code == 403
+
+
+# ---------- CIN à l'inscription, passeport facultatif ----------
+def reg_raw(c, **kw):
+    body = {"email": "z@example.com", "password": "motdepasse-solide", "full_name": "Z", **kw}
+    return c.post("/auth/register", json=body)
+
+
+def test_cin_is_required_for_candidate(client):
+    assert reg_raw(client).status_code == 422
+
+
+def test_cin_format_is_checked(client):
+    for bad in ["12345678", "ABCD123456", "AB12345", "AB123456789", "AB12$456", "A B"]:
+        assert reg_raw(client, cin=bad).status_code == 422, bad
+    for good in ["A123456", "AB123456", "ABC12345678"]:
+        client.cookies.clear()
+        assert reg_raw(client, email=f"{good}@example.com", cin=good).status_code == 201, good
+
+
+def test_cin_is_normalized_and_masked(client):
+    r = reg_raw(client, cin=" ab 123456 ")
+    assert r.status_code == 201
+    assert r.json()["cin_masked"] == "*****456"
+    assert "AB123456" not in r.text
+
+
+def test_same_cin_cannot_open_two_accounts(client):
+    assert reg_raw(client, cin="AB123456").status_code == 201
+    assert reg_raw(client, email="y@example.com", cin="ab123456").status_code == 409
+
+
+def test_cin_is_stored_encrypted(client):
+    from sqlalchemy import select
+    from smart_immigration.accounts import db as dbm
+    from smart_immigration.accounts.models import User
+    reg_raw(client, cin="AB123456")
+    with dbm._factory() as s:
+        u = s.scalar(select(User))
+        assert "AB123456" not in (u.cin_enc or "") and "AB123456" not in (u.cin_hash or "")
+
+
+def test_consultant_needs_no_cin(client):
+    assert reg_raw(client, role="consultant", invitation="invite-test").json()["cin_masked"] is None
+
+
+def test_passport_is_optional_then_added_in_profile(client):
+    register(client, "p@example.com"); login(client, "p@example.com")
+    assert client.get("/auth/me").json()["has_passport"] is False
+    assert client.patch("/auth/me", json={"passport": "x"}).status_code == 422
+    r = client.patch("/auth/me", json={"passport": "zb 1234567", "full_name": "Nouveau Nom"})
+    assert r.json()["has_passport"] is True and r.json()["full_name"] == "Nouveau Nom"
+    assert "ZB1234567" not in r.text
+
+
+def test_passport_can_be_added_with_a_request(client):
+    verified_candidate(client)
+    assert client.post("/requests", json={**STUDY, "passport": "bad!"}).status_code == 422
+    assert client.post("/requests", json={**STUDY, "passport": "ZB1234567"}).status_code == 201
+    assert client.get("/auth/me").json()["has_passport"] is True

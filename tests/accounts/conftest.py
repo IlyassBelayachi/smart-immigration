@@ -19,6 +19,7 @@ def fake_detector_one(img): return [(10, 10, 100, 100)]
 @pytest.fixture()
 def client(monkeypatch):
     monkeypatch.setenv("CONSULTANT_INVITE", "invite-test")
+    monkeypatch.setenv("DATA_ENCRYPTION_KEY", "cle-de-test")
     dbm.configure("sqlite:///:memory:")
     app.dependency_overrides[get_identity_agent] = lambda: IdentityAgent(fake_detector_one, AlwaysMatch())
     yield TestClient(app)
@@ -32,8 +33,19 @@ def png(sharp=True, size=300):
     return cv2.imencode(".png", img)[1].tobytes()
 
 
-def register(c, email, role="candidate", invitation=""):
-    return c.post("/auth/register", json={"email": email, "password": "motdepasse-solide", "full_name": "Test", "role": role, "invitation": invitation})
+_counter = {"n": 100000}
+
+
+def next_cin():
+    _counter["n"] += 1
+    return f"AB{_counter['n']}"
+
+
+def register(c, email, role="candidate", invitation="", cin=None):
+    body = {"email": email, "password": "motdepasse-solide", "full_name": "Test", "role": role, "invitation": invitation}
+    if role == "candidate":
+        body["cin"] = cin or next_cin()
+    return c.post("/auth/register", json=body)
 
 
 def login(c, email, pw="motdepasse-solide"):

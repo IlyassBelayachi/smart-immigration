@@ -3,8 +3,9 @@
 Code : `src/smart_immigration/accounts/` · Tests : `tests/accounts/` (13 tests).
 
 ## Le scénario
-1. **Le candidat crée un compte** → statut `pending_identity`.
-2. Il envoie sa **photo de profil** et sa **photo de CIN** (`POST /identity/submit`).
+1. **Le candidat crée un compte** avec sa **CIN** (obligatoire : 1 à 3 lettres + 6 à 8 chiffres, ex. `AB123456`, validée d'après une seule source, à confirmer sur une vraie CIN) → statut `pending_identity`. Une CIN = un seul compte. Elle est stockée chiffrée et n'est jamais renvoyée en clair (`*****456`).
+   Le **passeport est facultatif** : il s'ajoute plus tard (`PATCH /auth/me` ou dans une demande), 6 à 12 lettres/chiffres (pas de format officiel vérifié).
+2. Il envoie sa **photo de profil** et le **scan ou la photo de sa CIN** (`POST /identity/submit`).
 3. **L'agent d'identité** (OpenCV) vérifie : image lisible, assez grande, nette, **un seul visage** sur chaque photo, visages assez semblables.
    - Tout va bien → `verified`.
    - **Doute** → `resubmit_requested` + raisons en français : le candidat renvoie des photos. Pas de refus définitif, pas de passage par le consultant.
