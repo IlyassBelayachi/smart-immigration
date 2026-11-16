@@ -104,3 +104,19 @@ def fingerprint(value: str) -> str:
 
 def mask(value: str) -> str:
     return "*" * max(len(value) - 3, 0) + value[-3:]
+
+
+# ---------- Jetons à usage unique de but précis (défi webcam, email, mot de passe) ----------
+def make_purpose_token(purpose: str, minutes: int, **claims) -> str:
+    exp = datetime.now(timezone.utc) + timedelta(minutes=minutes)
+    return jwt.encode({"purpose": purpose, "exp": exp, **claims}, _jwt_secret(), algorithm="HS256")
+
+
+def read_purpose_token(token: str, purpose: str) -> dict | None:
+    data = read_token(token)
+    return data if data and data.get("purpose") == purpose else None
+
+
+def password_fingerprint(password_hash: str) -> str:
+    """Lie un jeton de réinitialisation à l'ancien mot de passe : il ne sert qu'une fois."""
+    return hashlib.sha256(password_hash.encode()).hexdigest()[:16]

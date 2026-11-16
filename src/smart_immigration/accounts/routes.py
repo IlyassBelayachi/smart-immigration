@@ -1,4 +1,4 @@
-"""Routes : /auth, /identity, /requests, /consultant."""
+"""Routes : /auth (connexion, profil), /requests, /consultant. L'inscription candidat est dans signup.py."""
 from __future__ import annotations
 
 import hmac
@@ -6,86 +6,32 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile
-from pydantic import BaseModel, Field, field_validator, model_validator
+from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import security
+from .common import (DUMMY_HASH, audit, clean_cin, clean_passport, current_user, email_confirmation_required,  # noqa: F401
+                     public, require, start_session)
 from .db import get_session
-from .identity import DetectorUnavailable, IdentityAgent
-from .models import AuditLog, Decision, IdentityCheck, IdentityDocument, ImmigrationRequest, User
+from .models import Decision, ImmigrationRequest, User
 from .recommend import recommend
+from .recovery import router as recovery_router
+from .signup import get_identity_agent, router as signup_router  # noqa: F401  (get_identity_agent réexporté pour les tests)
 
 router = APIRouter(tags=["accounts"])
-MAX_UPLOAD = 5 * 1024 * 1024
-IMAGE_TYPES = {"image/jpeg", "image/png"}
-DUMMY_HASH = security.hash_password("dummy-password-for-timing")
-
-
-def get_identity_agent() -> IdentityAgent:
-    return IdentityAgent()
-
-
-def audit(db: Session, user_id: int | None, action: str, detail: str = "") -> None:
-    db.add(AuditLog(user_id=user_id, action=action, detail=detail))
-
-
-def public(u: User) -> dict:
-    cin = security.decrypt(u.cin_enc) if u.cin_enc else None
-    return {"id": u.id, "email": u.email, "full_name": u.full_name, "role": u.role,
-            "identity_status": u.identity_status if u.role == "candidate" else None,
-            "cin_masked": security.mask(cin) if cin else None, "has_passport": bool(u.passport_enc)}
-
-
-def clean_cin(value: str) -> str:
-    cin = security.normalize_id(value)
-    if not security.CIN_RE.match(cin):
-        raise ValueError("CIN invalide : 1 à 3 lettres suivies de 6 à 8 chiffres (ex. AB123456).")
-    return cin
-
-
-def clean_passport(value: str) -> str:
-    passport = security.normalize_id(value)
-    if not security.PASSPORT_RE.match(passport):
-        raise ValueError("Passeport invalide : 6 à 12 lettres ou chiffres, sans symboles.")
-    return passport
-
-
-def current_user(request: Request, db: Session = Depends(get_session)) -> User:
-    payload = security.read_token(request.cookies.get(security.COOKIE, ""))
-    user = db.get(User, int(payload["sub"])) if payload else None
-    if user is None:
-        raise HTTPException(401, "Connectez-vous pour continuer.")
-    return user
-
-
-def require(role: str):
-    def dep(user: User = Depends(current_user)) -> User:
-        if user.role != role:
-            raise HTTPException(403, "Action réservée à un autre type de compte.")
-        return user
-    return dep
+router.include_router(signup_router)
+router.include_router(recovery_router)
 
 
 # ---------- Authentification ----------
-class RegisterBody(BaseModel):
+class ConsultantRegisterBody(BaseModel):
     email: str = Field(pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$", max_length=254)
     password: str = Field(min_length=10, max_length=128)
     full_name: str = Field(min_length=1, max_length=120)
-    role: Literal["candidate", "consultant"] = "candidate"
+    role: Literal["candidate", "consultant"] = "consultant"
     invitation: str = Field(default="", max_length=128)
-    cin: str | None = Field(default=None, max_length=20)  # obligatoire pour un candidat
-
-    @model_validator(mode="after")
-    def check_cin(self):
-        if self.role == "candidate":
-            if not self.cin:
-                raise ValueError("La CIN est obligatoire pour créer un compte candidat.")
-            self.cin = clean_cin(self.cin)
-        else:
-            self.cin = None
-        return self
 
 
 class LoginBody(BaseModel):
@@ -94,24 +40,21 @@ class LoginBody(BaseModel):
 
 
 @router.post("/auth/register", status_code=201)
-def register(body: RegisterBody, db: Session = Depends(get_session)):
-    if body.role == "consultant":
-        invite = os.environ.get("CONSULTANT_INVITE", "")
-        if not invite or not hmac.compare_digest(invite.encode(), body.invitation.encode()):
-            raise HTTPException(403, "Un code d'invitation valide est requis pour un compte consultant.")
+def register_consultant(body: ConsultantRegisterBody, db: Session = Depends(get_session)):
+    """Comptes consultants uniquement (code d'invitation). Les candidats passent par /auth/signup."""
+    if body.role != "consultant":
+        raise HTTPException(403, "Un compte candidat se crée avec la vérification d'identité (CIN + webcam).")
+    invite = os.environ.get("CONSULTANT_INVITE", "")
+    if not invite or not hmac.compare_digest(invite.encode(), body.invitation.encode()):
+        raise HTTPException(403, "Un code d'invitation valide est requis pour un compte consultant.")
     email = body.email.strip().lower()
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(409, "Cette adresse est déjà utilisée.")
-    cin_hash = security.fingerprint(body.cin) if body.cin else None
-    if cin_hash and db.scalar(select(User).where(User.cin_hash == cin_hash)):
-        raise HTTPException(409, "Un compte existe déjà avec cette CIN.")
-    user = User(email=email, full_name=body.full_name.strip(), role=body.role,
-                cin_hash=cin_hash, cin_enc=security.encrypt(body.cin) if body.cin else None,
-                password_hash=security.hash_password(body.password),
-                identity_status="pending_identity" if body.role == "candidate" else "n/a")
+    user = User(email=email, full_name=body.full_name.strip(), role="consultant", identity_status="n/a",
+                email_verified=True, password_hash=security.hash_password(body.password))
     db.add(user)
     db.flush()
-    audit(db, user.id, "register", body.role)
+    audit(db, user.id, "register", "consultant")
     return public(user)
 
 
@@ -133,10 +76,11 @@ def login(body: LoginBody, response: Response, db: Session = Depends(get_session
                 audit(db, user.id, "lockout")
             db.commit()
         raise HTTPException(401, "Adresse ou mot de passe incorrect.")
+    if user.role == "candidate" and email_confirmation_required() and not user.email_verified:
+        raise HTTPException(403, "Confirmez d'abord votre adresse email (lien envoyé à l'inscription).")
     user.failed_attempts, user.locked_until = 0, None
     audit(db, user.id, "login")
-    response.set_cookie(security.COOKIE, security.make_token(user.id, user.role), httponly=True,
-                        samesite="strict", max_age=security.SESSION_HOURS * 3600)
+    start_session(response, user)
     return public(user)
 
 
@@ -171,38 +115,6 @@ def update_profile(body: ProfileBody, user: User = Depends(current_user), db: Se
         user.passport_enc = security.encrypt(body.passport)
     audit(db, user.id, "profile_update")
     return public(user)
-
-
-# ---------- Vérification d'identité (agent) ----------
-async def _read_image(file: UploadFile) -> bytes:
-    if file.content_type not in IMAGE_TYPES:
-        raise HTTPException(422, "Formats acceptés : JPG ou PNG.")
-    data = await file.read(MAX_UPLOAD + 1)
-    if len(data) > MAX_UPLOAD:
-        raise HTTPException(413, "Fichier trop gros (5 Mo maximum).")
-    return data
-
-
-@router.post("/identity/submit")
-async def submit_identity(profile_photo: UploadFile = File(...), cin: UploadFile = File(...),
-                          user: User = Depends(require("candidate")), db: Session = Depends(get_session),
-                          agent: IdentityAgent = Depends(get_identity_agent)):
-    if user.identity_status == "verified":
-        raise HTTPException(409, "Votre identité est déjà vérifiée.")
-    photo, cin_bytes = await _read_image(profile_photo), await _read_image(cin)
-    for kind, f, data in (("profile_photo", profile_photo, photo), ("cin", cin, cin_bytes)):
-        db.add(IdentityDocument(user_id=user.id, kind=kind, filename=(f.filename or kind)[:255],
-                                media_type=f.content_type or "", content=data))
-    try:
-        verdict = agent.verify(photo, cin_bytes)
-    except DetectorUnavailable as error:
-        db.rollback()
-        raise HTTPException(503, str(error)) from error
-    db.add(IdentityCheck(user_id=user.id, agent=verdict.agent, outcome=verdict.outcome,
-                         reasons=verdict.reasons, details=verdict.details))
-    user.identity_status = "verified" if verdict.outcome == "verified" else "resubmit_requested"
-    audit(db, user.id, "identity_check", verdict.outcome)
-    return {"identity_status": user.identity_status, "reasons": verdict.reasons}
 
 
 # ---------- Demandes d'immigration (candidat) ----------

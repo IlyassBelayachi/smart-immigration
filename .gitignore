@@ -8,3 +8,4 @@ data/private/
 *.egg-info/
 .env
 data/private/
+models/
