@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, LargeBinary, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, LargeBinary, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -22,6 +22,10 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20))  # candidate | consultant
     # Candidats seulement : pending_identity -> verified | resubmit_requested
     identity_status: Mapped[str] = mapped_column(String(30), default="pending_identity")
+    cin_hash: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)  # unicité
+    cin_enc: Mapped[str | None] = mapped_column(Text, nullable=True)       # CIN chiffrée
+    passport_enc: Mapped[str | None] = mapped_column(Text, nullable=True)  # facultatif, ajouté plus tard
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
@@ -81,4 +85,20 @@ class AuditLog(Base):
     user_id: Mapped[int | None] = mapped_column(nullable=True)
     action: Mapped[str] = mapped_column(String(60))
     detail: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class SignupAttempt(Base):
+    """Essais d'inscription (pas de compte avant validation) : sert à limiter les essais par CIN et par adresse réseau."""
+    __tablename__ = "signup_attempts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    key_hash: Mapped[str] = mapped_column(String(64), index=True)
+    success: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class UsedChallenge(Base):
+    """Un défi webcam ne sert qu'une fois (anti-rejeu)."""
+    __tablename__ = "used_challenges"
+    jti: Mapped[str] = mapped_column(String(64), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)

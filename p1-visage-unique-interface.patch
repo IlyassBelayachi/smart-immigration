@@ -1,0 +1,1600 @@
+diff --git a/docs/04_AUTH_BD_IDENTITE.md b/docs/04_AUTH_BD_IDENTITE.md
+index c24b926..09e8d5d 100644
+--- a/docs/04_AUTH_BD_IDENTITE.md
++++ b/docs/04_AUTH_BD_IDENTITE.md
+@@ -7,9 +7,9 @@ Code : `src/smart_immigration/accounts/` · Interface : `frontend-app/` · Tests
+ ### Candidat — le compte n'est créé qu'APRÈS la vérification d'identité
+ 1. **Informations** : nom, email, mot de passe (10 caractères min.), **CIN** (1 à 3 lettres + 6 à 8 chiffres, ex. `AB123456`).
+ 2. **CIN** : envoi d'une photo ou d'un scan net du recto.
+-3. **Vérification en direct (webcam)** : l'écran demande 4 poses tirées au hasard (regarder la caméra, tourner la tête à gauche / à droite) ; une image est prise après chaque pose.
+-4. **L'agent d'identité** contrôle : CIN lisible avec un visage ; images nettes avec un seul visage ; poses réellement faites ; visage webcam = visage de la CIN ; **numéro de CIN saisi retrouvé sur l'image (OCR)** ; images non identiques.
+-5. **Tout est bon** → le compte est créé (identité « vérifiée »), un email de confirmation est envoyé. **Sinon aucun compte n'est créé** : raisons affichées, nouvel essai avec un nouveau défi.
++3. **Vérification en direct (webcam)** : une seule photo, prise en direct par la caméra (compte à rebours de 3 secondes, visage de face). Aucun geste à faire.
++4. **L'agent d'identité** contrôle : CIN lisible avec un visage ; photo nette avec un seul visage, regardant la caméra ; visage webcam = visage de la CIN ; **numéro de CIN saisi retrouvé sur l'image (OCR)** ; photo en direct différente du fichier de la CIN.
++5. **Tout est bon** → le compte est créé (identité « vérifiée »), un email de confirmation est envoyé. **Sinon aucun compte n'est créé** : raisons affichées, nouvel essai avec un nouveau défi (un défi ne sert qu'une fois).
+ 6. **Confirmation de l'email** (lien) puis connexion. Le **passeport est facultatif** et s'ajoute plus tard (profil ou demande).
+ 
+ ### Consultant
+@@ -30,8 +30,8 @@ Sans `SMTP_HOST`, les emails **s'affichent dans la console du serveur** (mode d
+ `python scripts/download_face_models.py` télécharge OpenCV YuNet (détection) et SFace (comparaison) dans `models/` (ignoré par Git). Sans eux, l'inscription répond « 503 » et **ne crée jamais de compte**.
+ 
+ ## Limites à annoncer honnêtement
+-- Le défi aléatoire rend l'usage d'une photo imprimée difficile, mais **une vidéo préparée pourrait encore tromper** : ce n'est pas un test anti-fraude certifié.
+-- Les seuils (ressemblance 0,363 de référence OpenCV ; pose de la tête 0,20) sont à **ajuster avec de vraies captures** ; ils sont dans `identity.py` et `liveness.py`.
++- Une seule photo en direct ne prouve pas que la personne est vivante : **une photo ou une vidéo présentée devant la caméra pourrait tromper** le contrôle. Ce n'est pas un test anti-fraude certifié.
++- Les seuils (ressemblance 0,363, référence OpenCV ; visage de face 0,35) sont à **ajuster avec de vraies captures** ; ils sont dans `identity.py` et `liveness.py`.
+ - La règle OCR dépend de la qualité de lecture de la CIN ; si l'OCR n'est pas installé elle est ignorée (notée dans le journal).
+ - Format de CIN tiré d'une seule source (à confirmer sur une vraie CIN) ; format du passeport non vérifié (validation souple).
+ - Tests faits sur SQLite et avec de faux modèles de visage ; **PostgreSQL et modèles réels à tester** sur votre machine.
+diff --git a/frontend-app/index.html b/frontend-app/index.html
+index 95a5074..639c372 100644
+--- a/frontend-app/index.html
++++ b/frontend-app/index.html
+@@ -4,6 +4,10 @@
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>Smart Immigration</title>
++    <meta name="theme-color" content="#af274f" />
++    <link rel="preconnect" href="https://fonts.googleapis.com" />
++    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
++    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+   </head>
+   <body>
+     <div id="root"></div>
+diff --git a/frontend-app/package-lock.json b/frontend-app/package-lock.json
+index b17c954..18b56bf 100644
+--- a/frontend-app/package-lock.json
++++ b/frontend-app/package-lock.json
+@@ -8,6 +8,8 @@
+       "name": "smart-immigration-app",
+       "version": "0.1.0",
+       "dependencies": {
++        "@gsap/react": "2.1.1",
++        "gsap": "3.12.5",
+         "react": "18.3.1",
+         "react-dom": "18.3.1"
+       },
+@@ -689,6 +691,16 @@
+         "node": ">=12"
+       }
+     },
++    "node_modules/@gsap/react": {
++      "version": "2.1.1",
++      "resolved": "https://registry.npmjs.org/@gsap/react/-/react-2.1.1.tgz",
++      "integrity": "sha512-apGPRrmpqxvl1T6Io1KgT8tFU+IuACI6z4zmT7t8+PASserJeLVRFJdSNUFA2Xb/eVkZI1noE8LIrY/w/oJECw==",
++      "license": "SEE LICENSE AT https://gsap.com/standard-license",
++      "dependencies": {
++        "gsap": "^3.12.5",
++        "react": ">=16"
++      }
++    },
+     "node_modules/@jridgewell/gen-mapping": {
+       "version": "0.3.13",
+       "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz",
+@@ -1349,6 +1361,12 @@
+         "node": ">=6.9.0"
+       }
+     },
++    "node_modules/gsap": {
++      "version": "3.12.5",
++      "resolved": "https://registry.npmjs.org/gsap/-/gsap-3.12.5.tgz",
++      "integrity": "sha512-srBfnk4n+Oe/ZnMIOXt3gT605BX9x5+rh/prT2F1SsNJsU1XuMiP0E2aptW481OnonOGACZWBqseH5Z7csHxhQ==",
++      "license": "Standard 'no charge' license: https://gsap.com/standard-license. Club GSAP members get more: https://gsap.com/licensing/. Why GreenSock doesn't employ an MIT license: https://gsap.com/why-license/"
++    },
+     "node_modules/js-tokens": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz",
+diff --git a/frontend-app/package.json b/frontend-app/package.json
+index 1b81eff..dd19cb0 100644
+--- a/frontend-app/package.json
++++ b/frontend-app/package.json
+@@ -10,7 +10,9 @@
+   },
+   "dependencies": {
+     "react": "18.3.1",
+-    "react-dom": "18.3.1"
++    "react-dom": "18.3.1",
++    "gsap": "3.12.5",
++    "@gsap/react": "2.1.1"
+   },
+   "devDependencies": {
+     "@vitejs/plugin-react": "4.3.4",
+diff --git a/frontend-app/src/App.jsx b/frontend-app/src/App.jsx
+index 466dc52..37d9be8 100644
+--- a/frontend-app/src/App.jsx
++++ b/frontend-app/src/App.jsx
+@@ -1,47 +1,51 @@
+ import React, { useEffect, useState } from "react";
+ import { api } from "./api.js";
++import Home from "./Home.jsx";
+ import AuthScreen from "./AuthScreen.jsx";
+-import { VerifyEmail, ResetPassword } from "./EmailLinks.jsx";
+ import Candidate from "./Candidate.jsx";
+ import Consultant from "./Consultant.jsx";
++import { VerifyEmail, ResetPassword } from "./EmailLinks.jsx";
+ 
+ export default function App() {
+   const [user, setUser] = useState(undefined); // undefined = chargement, null = déconnecté
++  const [space, setSpace] = useState(null);
+   const params = new URLSearchParams(window.location.search);
+   const [link, setLink] = useState({ verify: params.get("verify"), reset: params.get("reset") });
+   const leaveLink = () => { window.history.replaceState({}, "", window.location.pathname); setLink({}); };
+ 
+-  useEffect(() => {
+-    api.me().then(setUser).catch(() => setUser(null));
+-  }, []);
++  useEffect(() => { api.me().then(setUser).catch(() => setUser(null)); }, []);
+ 
+   const logout = async () => {
+     await api.logout().catch(() => {});
+     setUser(null);
++    setSpace(null);
+   };
+ 
+-  if (user === undefined) return <p className="center muted">Chargement…</p>;
++  const inLink = link.verify || link.reset;
+ 
+   return (
+     <div className="shell">
+       <header className="top">
+-        <strong>Smart Immigration</strong>
++        <span className="brand"><i className="mark" aria-hidden="true" />Smart Immigration</span>
+         {user && (
+           <span className="who">
+-            {user.full_name} · {user.role === "consultant" ? "Consultant" : "Candidat"}
++            <span>{user.full_name}</span>
+             <button className="link" onClick={logout}>Se déconnecter</button>
+           </span>
+         )}
+       </header>
+       <main>
++        {user === undefined && <p className="muted">Chargement…</p>}
+         {link.verify && <VerifyEmail token={link.verify} onDone={leaveLink} />}
+         {link.reset && <ResetPassword token={link.reset} onDone={leaveLink} />}
+-        {!link.verify && !link.reset && !user && <AuthScreen onLogin={setUser} />}
+-        {!link.verify && !link.reset && user?.role === "consultant" && <Consultant />}
+-        {!link.verify && !link.reset && user?.role === "candidate" && <Candidate user={user} onUser={setUser} />}
++        {user === null && !inLink && (space
++          ? <AuthScreen space={space} onLogin={setUser} onBack={() => setSpace(null)} />
++          : <Home onChoose={setSpace} />)}
++        {user && !inLink && user.role === "consultant" && <Consultant />}
++        {user && !inLink && user.role === "candidate" && <Candidate user={user} onUser={setUser} />}
+       </main>
+       <footer className="foot">
+-        Projet PFA EMSI 2026-2027 · L'assistant prépare le dossier, c'est toujours un consultant humain qui décide.
++        Projet PFA EMSI 2026-2027. L'assistant prépare le dossier ; la décision revient toujours à un consultant.
+       </footer>
+     </div>
+   );
+diff --git a/frontend-app/src/AuthScreen.jsx b/frontend-app/src/AuthScreen.jsx
+index 437effe..59908df 100644
+--- a/frontend-app/src/AuthScreen.jsx
++++ b/frontend-app/src/AuthScreen.jsx
+@@ -1,19 +1,22 @@
+-import React, { useState } from "react";
++import React, { useRef, useState } from "react";
+ import { api } from "./api.js";
+ import Signup from "./Signup.jsx";
++import { usePanelMotion } from "./usePanelMotion.js";
+ 
+-export default function AuthScreen({ onLogin, notice }) {
+-  const [mode, setMode] = useState("login"); // login | signup | consultant | forgot
++const TITLES = { candidate: "Espace candidat", consultant: "Espace consultant" };
++
++export default function AuthScreen({ space, onLogin, onBack }) {
++  const root = useRef(null);
++  const [mode, setMode] = useState("login"); // login | signup | register | forgot
+   const [form, setForm] = useState({ email: "", password: "", full_name: "", invitation: "" });
+   const [error, setError] = useState("");
+-  const [info, setInfo] = useState(notice || "");
++  const [info, setInfo] = useState("");
+   const [busy, setBusy] = useState(false);
+   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+-
+-  if (mode === "signup") return <Signup onBack={() => setMode("login")} />;
+-
+   const go = (m) => { setMode(m); setError(""); setInfo(""); };
+ 
++  usePanelMotion(root, mode);
++
+   const submit = async (e) => {
+     e.preventDefault();
+     setError("");
+@@ -22,12 +25,17 @@ export default function AuthScreen({ onLogin, notice }) {
+     try {
+       if (mode === "forgot") {
+         await api.forgotPassword(form.email);
+-        setInfo("Si un compte existe pour cette adresse, un email avec un lien de réinitialisation vient d'être envoyé.");
++        setInfo("Si un compte existe pour cette adresse, un email avec un lien vient d'être envoyé.");
+       } else {
+-        if (mode === "consultant") {
++        if (mode === "register") {
+           await api.register({ email: form.email, password: form.password, full_name: form.full_name, role: "consultant", invitation: form.invitation });
+         }
+-        onLogin(await api.login({ email: form.email, password: form.password }));
++        const user = await api.login({ email: form.email, password: form.password });
++        if (user.role !== space) {
++          await api.logout();
++          throw new Error(space === "candidate" ? "Ce compte est un compte consultant : choisissez l'espace consultant." : "Ce compte est un compte candidat : choisissez l'espace candidat.");
++        }
++        onLogin(user);
+       }
+     } catch (err) {
+       setError(err.message);
+@@ -37,33 +45,40 @@ export default function AuthScreen({ onLogin, notice }) {
+   };
+ 
+   return (
+-    <section className="card narrow">
+-      <div className="tabs">
+-        <button className={mode !== "signup" ? "on" : ""} onClick={() => go("login")}>Connexion</button>
+-        <button onClick={() => go("signup")}>Créer un compte candidat</button>
+-      </div>
+-      <form onSubmit={submit}>
+-        {mode === "consultant" && (
+-          <label>Nom complet <input value={form.full_name} onChange={set("full_name")} required maxLength={120} /></label>
+-        )}
+-        <label>Adresse email <input type="email" value={form.email} onChange={set("email")} required autoComplete="email" /></label>
+-        {mode !== "forgot" && (
+-          <label>Mot de passe {mode === "consultant" && <small>(10 caractères minimum)</small>}
+-            <input type="password" value={form.password} onChange={set("password")} required minLength={mode === "consultant" ? 10 : 1}
+-                   autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>
+-        )}
+-        {mode === "consultant" && (
+-          <label>Code d'invitation consultant <input value={form.invitation} onChange={set("invitation")} required /></label>
+-        )}
+-        {info && <p className="ok" role="status">{info}</p>}
+-        {error && <p className="error" role="alert">{error}</p>}
+-        <button className="primary" disabled={busy}>
+-          {busy ? "Patientez…" : mode === "forgot" ? "Envoyer le lien" : mode === "consultant" ? "Créer mon compte consultant" : "Se connecter"}
+-        </button>
+-      </form>
+-      {mode === "login" && <button className="link small" onClick={() => go("forgot")}>Mot de passe oublié ?</button>}
+-      {mode === "login" && <button className="link small" onClick={() => go("consultant")}>Espace consultant : créer un compte</button>}
+-      {(mode === "consultant" || mode === "forgot") && <button className="link" onClick={() => go("login")}>← Retour</button>}
++    <section className={"auth " + space}>
++      <button className="link back" onClick={onBack}>Changer d'espace</button>
++      <h1 className="auth-title">{TITLES[space]}</h1>
++      {mode === "signup" ? (
++        <Signup onBack={() => go("login")} />
++      ) : (
++        <div ref={root} className="auth-body">
++          <div className="panel">
++            <div className="tabs" role="tablist">
++              <button role="tab" aria-selected={mode !== "register"} className={mode !== "register" ? "on" : ""} onClick={() => go("login")}>Connexion</button>
++              {space === "candidate"
++                ? <button role="tab" aria-selected="false" onClick={() => go("signup")}>Créer un compte</button>
++                : <button role="tab" aria-selected={mode === "register"} className={mode === "register" ? "on" : ""} onClick={() => go("register")}>Créer un compte</button>}
++            </div>
++            <form onSubmit={submit}>
++              {mode === "register" && <label>Nom complet <input value={form.full_name} onChange={set("full_name")} required maxLength={120} /></label>}
++              <label>Adresse email <input type="email" value={form.email} onChange={set("email")} required autoComplete="email" /></label>
++              {mode !== "forgot" && (
++                <label>Mot de passe {mode === "register" && <small>10 caractères minimum</small>}
++                  <input type="password" value={form.password} onChange={set("password")} required minLength={mode === "register" ? 10 : 1}
++                         autoComplete={mode === "login" ? "current-password" : "new-password"} /></label>
++              )}
++              {mode === "register" && <label>Code d'invitation <input value={form.invitation} onChange={set("invitation")} required /></label>}
++              {info && <p className="ok" role="status">{info}</p>}
++              {error && <p className="error" role="alert">{error}</p>}
++              <button className="primary" disabled={busy}>
++                {busy ? "Patientez…" : mode === "forgot" ? "Envoyer le lien" : mode === "register" ? "Créer mon compte" : "Se connecter"}
++              </button>
++            </form>
++            {mode === "login" && <button className="link" onClick={() => go("forgot")}>Mot de passe oublié ?</button>}
++            {mode === "forgot" && <button className="link" onClick={() => go("login")}>Retour à la connexion</button>}
++          </div>
++        </div>
++      )}
+     </section>
+   );
+ }
+diff --git a/frontend-app/src/Camera.jsx b/frontend-app/src/Camera.jsx
+deleted file mode 100644
+index 3643005..0000000
+--- a/frontend-app/src/Camera.jsx
++++ /dev/null
+@@ -1,77 +0,0 @@
+-import React, { useEffect, useRef, useState } from "react";
+-
+-// Prend une photo avec la webcam, ou permet de choisir un fichier. Rend un File/Blob via onChange.
+-export default function Camera({ label, value, onChange }) {
+-  const video = useRef(null);
+-  const stream = useRef(null);
+-  const [live, setLive] = useState(false);
+-  const [error, setError] = useState("");
+-  const [preview, setPreview] = useState("");
+-
+-  useEffect(() => {
+-    if (!value) return setPreview("");
+-    const url = URL.createObjectURL(value);
+-    setPreview(url);
+-    return () => URL.revokeObjectURL(url);
+-  }, [value]);
+-
+-  useEffect(() => () => stop(), []);
+-
+-  function stop() {
+-    stream.current?.getTracks().forEach((t) => t.stop());
+-    stream.current = null;
+-    setLive(false);
+-  }
+-
+-  async function start() {
+-    setError("");
+-    try {
+-      stream.current = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+-      setLive(true);
+-      requestAnimationFrame(() => {
+-        if (video.current) video.current.srcObject = stream.current;
+-      });
+-    } catch {
+-      setError("Caméra indisponible ou refusée. Choisissez plutôt un fichier.");
+-    }
+-  }
+-
+-  function snap() {
+-    const v = video.current;
+-    const canvas = document.createElement("canvas");
+-    canvas.width = v.videoWidth;
+-    canvas.height = v.videoHeight;
+-    canvas.getContext("2d").drawImage(v, 0, 0);
+-    canvas.toBlob((blob) => {
+-      if (blob) onChange(new File([blob], "photo.jpg", { type: "image/jpeg" }));
+-      stop();
+-    }, "image/jpeg", 0.92);
+-  }
+-
+-  return (
+-    <div className="camera">
+-      <strong>{label}</strong>
+-      {live ? (
+-        <>
+-          <video ref={video} autoPlay playsInline muted />
+-          <div className="row">
+-            <button type="button" className="primary" onClick={snap}>Prendre la photo</button>
+-            <button type="button" onClick={stop}>Annuler</button>
+-          </div>
+-        </>
+-      ) : (
+-        <>
+-          {preview && <img src={preview} alt="Aperçu" className="preview" />}
+-          <div className="row">
+-            <button type="button" onClick={start}>{value ? "Reprendre avec la caméra" : "Utiliser la caméra"}</button>
+-            <label className="filebtn">
+-              Choisir un fichier
+-              <input type="file" accept="image/jpeg,image/png" hidden onChange={(e) => e.target.files[0] && onChange(e.target.files[0])} />
+-            </label>
+-          </div>
+-        </>
+-      )}
+-      {error && <p className="error">{error}</p>}
+-    </div>
+-  );
+-}
+diff --git a/frontend-app/src/Candidate.jsx b/frontend-app/src/Candidate.jsx
+index 2b950fc..dd41e79 100644
+--- a/frontend-app/src/Candidate.jsx
++++ b/frontend-app/src/Candidate.jsx
+@@ -1,17 +1,21 @@
+-import React, { useEffect, useState } from "react";
++import React, { useEffect, useRef, useState } from "react";
+ import { api } from "./api.js";
+ import { COUNTRIES, MOTIVES, STATUS } from "./labels.js";
+ import Recommendation from "./Recommendation.jsx";
++import StatusTrack from "./StatusTrack.jsx";
++import { useEnter, usePanelMotion } from "./usePanelMotion.js";
+ 
+ const tri = (v) => (v === "yes" ? true : v === "no" ? false : undefined);
+ 
+ export default function Candidate({ user, onUser }) {
++  const root = useRef(null);
++  const [tab, setTab] = useState("requests");
+   const [requests, setRequests] = useState([]);
+   const [editing, setEditing] = useState(false);
+   const [profile, setProfile] = useState({ full_name: user.full_name, passport: "" });
+   const [profileMsg, setProfileMsg] = useState("");
+   const [f, setF] = useState({ motive: "study", destination: "CA", passport: "", level_of_study: "", has_letter_of_acceptance: "",
+-    family_size: "1", destination_province: "", funds_available_cad: "", tuition_first_year_cad: "", application_date: "" });
++    destination_province: "", family_size: "1", funds_available_cad: "", tuition_first_year_cad: "", application_date: "" });
+   const [error, setError] = useState("");
+   const [busy, setBusy] = useState(false);
+   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+@@ -19,6 +23,9 @@ export default function Candidate({ user, onUser }) {
+   const load = () => api.myRequests().then(setRequests).catch((e) => setError(e.message));
+   useEffect(() => { load(); }, []);
+ 
++  useEnter(root, ".welcome > *");
++  usePanelMotion(root, tab, 18);
++
+   const saveProfile = async (e) => {
+     e.preventDefault();
+     setProfileMsg("");
+@@ -27,8 +34,8 @@ export default function Candidate({ user, onUser }) {
+       if (profile.passport) body.passport = profile.passport;
+       onUser(await api.updateProfile(body));
+       setProfile({ ...profile, passport: "" });
+-      setProfileMsg("Profil mis à jour.");
+       setEditing(false);
++      setProfileMsg("Profil mis à jour.");
+     } catch (err) {
+       setProfileMsg(err.message);
+     }
+@@ -55,6 +62,7 @@ export default function Candidate({ user, onUser }) {
+       onUser(await api.me());
+       setF({ ...f, passport: "" });
+       await load();
++      setTab("requests");
+     } catch (err) {
+       setError(err.message);
+     } finally {
+@@ -65,93 +73,107 @@ export default function Candidate({ user, onUser }) {
+   const ca = f.motive === "study" && f.destination === "CA";
+ 
+   return (
+-    <>
+-      <section className="card">
+-        <h2>Mon profil</h2>
+-        <p className="ok">✔ Identité vérifiée</p>
+-        {!editing ? (
++    <div ref={root} className="candidate">
++      <div className="welcome">
++        <h1>Bonjour {user.full_name.split(" ")[0]}</h1>
++        <p><span className="chip ok">Identité vérifiée</span> CIN {user.cin_masked}</p>
++      </div>
++
++      <nav className="subnav" role="tablist">
++        {[["requests", `Mes demandes${requests.length ? ` (${requests.length})` : ""}`], ["new", "Nouvelle demande"], ["profile", "Mon profil"]].map(([k, v]) => (
++          <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{v}</button>
++        ))}
++      </nav>
++
++      <section className="panel">
++        {tab === "requests" && (
+           <>
+-            <ul className="plain">
+-              <li><strong>Nom :</strong> {user.full_name}</li>
+-              <li><strong>Email :</strong> {user.email}</li>
+-              <li><strong>CIN :</strong> {user.cin_masked}</li>
+-              <li><strong>Passeport :</strong> {user.has_passport ? "Enregistré" : "Pas encore ajouté (facultatif pour l'instant)"}</li>
+-            </ul>
+-            <button onClick={() => setEditing(true)}>Modifier mon profil</button>
+-            {profileMsg && <p className="muted">{profileMsg}</p>}
++            <h2>Mes demandes</h2>
++            {requests.length === 0 && (
++              <p className="empty">Aucune demande pour l'instant. <button className="link" onClick={() => setTab("new")}>Créer ma première demande</button></p>
++            )}
++            {requests.map((r) => (
++              <article key={r.id} className="req">
++                <h3>{MOTIVES[r.motive]} · {COUNTRIES[r.destination] || r.destination} <span className={"status s-" + r.status}>{STATUS[r.status]}</span></h3>
++                <StatusTrack status={r.status} />
++                <Recommendation rec={r.recommendation} />
++                {r.decisions.map((d, i) => <p key={i} className="decision"><strong>Consultant :</strong> {STATUS[d.decision]}. {d.reason}</p>)}
++              </article>
++            ))}
+           </>
+-        ) : (
+-          <form onSubmit={saveProfile}>
+-            <label>Nom complet <input value={profile.full_name} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} required /></label>
+-            <label>Numéro de passeport <small>(6 à 12 lettres ou chiffres, facultatif)</small>
+-              <input value={profile.passport} onChange={(e) => setProfile({ ...profile, passport: e.target.value })} />
+-            </label>
+-            {profileMsg && <p className="error">{profileMsg}</p>}
+-            <div className="row"><button className="primary">Enregistrer</button><button type="button" onClick={() => setEditing(false)}>Annuler</button></div>
+-          </form>
+         )}
+-      </section>
+ 
+-      <section className="card">
+-        <h2>Nouvelle demande d'immigration</h2>
+-        <form onSubmit={submit}>
+-          <div className="grid2">
+-            <label>Motif
+-              <select value={f.motive} onChange={set("motive")}>{Object.entries(MOTIVES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+-            </label>
+-            <label>Pays de destination
+-              <select value={f.destination} onChange={set("destination")}>{Object.entries(COUNTRIES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+-            </label>
+-          </div>
+-          {ca ? (
++        {tab === "new" && (
++          <form onSubmit={submit}>
++            <h2>Nouvelle demande</h2>
+             <div className="grid2">
+-              <label>Niveau d'études visé
+-                <select value={f.level_of_study} onChange={set("level_of_study")}>
+-                  <option value="">—</option><option value="secondary">Secondaire</option><option value="college">Collège</option>
+-                  <option value="bachelor">Licence</option><option value="master">Master</option><option value="phd">Doctorat</option>
+-                </select>
+-              </label>
+-              <label>Lettre d'acceptation obtenue ?
+-                <select value={f.has_letter_of_acceptance} onChange={set("has_letter_of_acceptance")}>
+-                  <option value="">Je ne sais pas</option><option value="yes">Oui</option><option value="no">Non</option>
+-                </select>
++              <label>Motif
++                <select value={f.motive} onChange={set("motive")}>{Object.entries(MOTIVES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+               </label>
+-              <label>Province de destination
+-                <select value={f.destination_province} onChange={set("destination_province")}>
+-                  <option value="">—</option><option value="QC">Québec</option><option value="ON">Ontario</option><option value="BC">Colombie-Britannique</option>
+-                  <option value="AB">Alberta</option><option value="NS">Nouvelle-Écosse</option><option value="MB">Manitoba</option><option value="NB">Nouveau-Brunswick</option>
+-                </select>
++              <label>Pays de destination
++                <select value={f.destination} onChange={set("destination")}>{Object.entries(COUNTRIES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+               </label>
+-              <label>Nombre de personnes (vous inclus)<input type="number" min="1" value={f.family_size} onChange={set("family_size")} /></label>
+-              <label>Fonds disponibles (CAD)<input type="number" min="0" value={f.funds_available_cad} onChange={set("funds_available_cad")} /></label>
+-              <label>Frais de scolarité 1re année (CAD)<input type="number" min="0" value={f.tuition_first_year_cad} onChange={set("tuition_first_year_cad")} /></label>
+-              <label>Date de dépôt prévue<input type="date" value={f.application_date} onChange={set("application_date")} /></label>
+             </div>
+-          ) : (
+-            <p className="hint">Pour ce pays et ce motif, il n'y a pas encore de règles automatiques : votre demande sera examinée entièrement par un consultant.</p>
+-          )}
+-          <label>Numéro de passeport <small>(facultatif, peut être ajouté plus tard)</small>
+-            <input value={f.passport} onChange={set("passport")} placeholder={user.has_passport ? "Déjà enregistré" : ""} />
+-          </label>
+-          {error && <p className="error" role="alert">{error}</p>}
+-          <button className="primary" disabled={busy}>{busy ? "Envoi…" : "Envoyer ma demande"}</button>
+-        </form>
+-      </section>
++            {ca ? (
++              <div className="grid2">
++                <label>Niveau d'études visé
++                  <select value={f.level_of_study} onChange={set("level_of_study")}>
++                    <option value="">Non précisé</option><option value="secondary">Secondaire</option><option value="college">Collège</option>
++                    <option value="bachelor">Licence</option><option value="master">Master</option><option value="phd">Doctorat</option>
++                  </select>
++                </label>
++                <label>Lettre d'acceptation obtenue ?
++                  <select value={f.has_letter_of_acceptance} onChange={set("has_letter_of_acceptance")}>
++                    <option value="">Je ne sais pas</option><option value="yes">Oui</option><option value="no">Non</option>
++                  </select>
++                </label>
++                <label>Province de destination
++                  <select value={f.destination_province} onChange={set("destination_province")}>
++                    <option value="">Non précisée</option><option value="QC">Québec</option><option value="ON">Ontario</option><option value="BC">Colombie-Britannique</option>
++                    <option value="AB">Alberta</option><option value="NS">Nouvelle-Écosse</option><option value="MB">Manitoba</option><option value="NB">Nouveau-Brunswick</option>
++                  </select>
++                </label>
++                <label>Personnes concernées (vous inclus)<input type="number" min="1" value={f.family_size} onChange={set("family_size")} /></label>
++                <label>Fonds disponibles (CAD)<input type="number" min="0" value={f.funds_available_cad} onChange={set("funds_available_cad")} /></label>
++                <label>Frais de scolarité, 1re année (CAD)<input type="number" min="0" value={f.tuition_first_year_cad} onChange={set("tuition_first_year_cad")} /></label>
++                <label>Date de dépôt prévue<input type="date" value={f.application_date} onChange={set("application_date")} /></label>
++              </div>
++            ) : (
++              <p className="hint">Pour ce pays et ce motif, il n'y a pas encore de règles automatiques : un consultant examinera toute la demande.</p>
++            )}
++            <label>Numéro de passeport <small>facultatif, vous pouvez l'ajouter plus tard</small>
++              <input value={f.passport} onChange={set("passport")} placeholder={user.has_passport ? "Déjà enregistré" : ""} />
++            </label>
++            {error && <p className="error" role="alert">{error}</p>}
++            <button className="primary" disabled={busy}>{busy ? "Envoi…" : "Envoyer ma demande"}</button>
++          </form>
++        )}
+ 
+-      <section className="card">
+-        <h2>Mes demandes</h2>
+-        {requests.length === 0 && <p className="muted">Aucune demande pour l'instant.</p>}
+-        {requests.map((r) => (
+-          <article key={r.id} className="req">
+-            <h3>#{r.id} · {MOTIVES[r.motive]} · {COUNTRIES[r.destination] || r.destination}
+-              <span className={"status s-" + r.status}>{STATUS[r.status]}</span></h3>
+-            <Recommendation rec={r.recommendation} />
+-            {r.decisions.map((d, i) => (
+-              <p key={i} className="decision"><strong>Consultant :</strong> {STATUS[d.decision]} — {d.reason}</p>
+-            ))}
+-          </article>
+-        ))}
++        {tab === "profile" && (
++          !editing ? (
++            <>
++              <h2>Mon profil</h2>
++              <dl className="facts-list">
++                <div><dt>Nom</dt><dd>{user.full_name}</dd></div>
++                <div><dt>Email</dt><dd>{user.email}</dd></div>
++                <div><dt>CIN</dt><dd>{user.cin_masked}</dd></div>
++                <div><dt>Passeport</dt><dd>{user.has_passport ? "Enregistré" : "Pas encore ajouté"}</dd></div>
++              </dl>
++              <button onClick={() => setEditing(true)}>Modifier mon profil</button>
++              {profileMsg && <p className="muted">{profileMsg}</p>}
++            </>
++          ) : (
++            <form onSubmit={saveProfile}>
++              <h2>Modifier mon profil</h2>
++              <label>Nom complet <input value={profile.full_name} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} required /></label>
++              <label>Numéro de passeport <small>6 à 12 lettres ou chiffres, facultatif</small>
++                <input value={profile.passport} onChange={(e) => setProfile({ ...profile, passport: e.target.value })} /></label>
++              {profileMsg && <p className="error">{profileMsg}</p>}
++              <div className="row"><button className="primary">Enregistrer</button><button type="button" onClick={() => setEditing(false)}>Annuler</button></div>
++            </form>
++          )
++        )}
+       </section>
+-    </>
++    </div>
+   );
+ }
+diff --git a/frontend-app/src/Consultant.jsx b/frontend-app/src/Consultant.jsx
+index bef1c1c..32adef0 100644
+--- a/frontend-app/src/Consultant.jsx
++++ b/frontend-app/src/Consultant.jsx
+@@ -1,9 +1,14 @@
+-import React, { useEffect, useState } from "react";
++import React, { useEffect, useRef, useState } from "react";
+ import { api } from "./api.js";
+ import { COUNTRIES, MOTIVES, STATUS } from "./labels.js";
+ import Recommendation from "./Recommendation.jsx";
++import StatusTrack from "./StatusTrack.jsx";
++import { useEnter } from "./usePanelMotion.js";
++
++const FILTERS = [["awaiting_review", "À examiner"], ["needs_info", "Complément demandé"], ["approved", "Approuvées"], ["rejected", "Refusées"], ["all", "Toutes"]];
+ 
+ export default function Consultant() {
++  const root = useRef(null);
+   const [filter, setFilter] = useState("awaiting_review");
+   const [items, setItems] = useState([]);
+   const [error, setError] = useState("");
+@@ -11,6 +16,7 @@ export default function Consultant() {
+ 
+   const load = () => api.consultantRequests().then(setItems).catch((e) => setError(e.message));
+   useEffect(() => { load(); }, []);
++  useEnter(root, ".counts > *");
+ 
+   const decide = async (id, decision) => {
+     setError("");
+@@ -23,42 +29,47 @@ export default function Consultant() {
+     }
+   };
+ 
++  const count = (k) => (k === "all" ? items.length : items.filter((r) => r.status === k).length);
+   const shown = items.filter((r) => filter === "all" || r.status === filter);
+ 
+   return (
+-    <section className="card">
+-      <h2>Demandes d'immigration à examiner</h2>
+-      <p className="hint">Les comptes sont vérifiés automatiquement par l'assistant d'identité. Ici, vous examinez les demandes et vous décidez.</p>
+-      <div className="tabs">
+-        {[["awaiting_review", "À examiner"], ["needs_info", "Complément demandé"], ["approved", "Approuvées"], ["rejected", "Refusées"], ["all", "Toutes"]].map(([k, v]) => (
+-          <button key={k} className={filter === k ? "on" : ""} onClick={() => setFilter(k)}>{v}</button>
++    <div ref={root} className="consultant">
++      <h1>Demandes d'immigration</h1>
++      <p className="muted">Les comptes sont vérifiés automatiquement. Ici, vous examinez les demandes et vous décidez.</p>
++      <div className="counts" role="tablist">
++        {FILTERS.map(([k, v]) => (
++          <button key={k} role="tab" aria-selected={filter === k} className={"count-card" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>
++            <strong>{count(k)}</strong><span>{v}</span>
++          </button>
+         ))}
+       </div>
+-      {error && <p className="error" role="alert">{error}</p>}
+-      {shown.length === 0 && <p className="muted">Aucune demande dans cette liste.</p>}
+-      {shown.map((r) => {
+-        const closed = r.status === "approved" || r.status === "rejected";
+-        return (
+-          <article key={r.id} className="req">
+-            <h3>#{r.id} · {MOTIVES[r.motive]} · {COUNTRIES[r.destination] || r.destination}
+-              <span className={"status s-" + r.status}>{STATUS[r.status]}</span></h3>
+-            <Recommendation rec={r.recommendation} />
+-            {r.decisions.map((d, i) => <p key={i} className="decision">{STATUS[d.decision]} — {d.reason}</p>)}
+-            {!closed && (
+-              <div>
+-                <label>Motif de votre décision
+-                  <textarea rows="2" value={reasons[r.id] || ""} onChange={(e) => setReasons({ ...reasons, [r.id]: e.target.value })} />
+-                </label>
+-                <div className="row">
+-                  <button className="primary" onClick={() => decide(r.id, "approved")}>Approuver</button>
+-                  <button onClick={() => decide(r.id, "needs_info")}>Demander un complément</button>
+-                  <button className="danger" onClick={() => decide(r.id, "rejected")}>Refuser</button>
++      <section className="panel">
++        {error && <p className="error" role="alert">{error}</p>}
++        {shown.length === 0 && <p className="empty">Aucune demande dans cette liste.</p>}
++        {shown.map((r) => {
++          const closed = r.status === "approved" || r.status === "rejected";
++          return (
++            <article key={r.id} className="req">
++              <h3>Demande {r.id} · {MOTIVES[r.motive]} · {COUNTRIES[r.destination] || r.destination} <span className={"status s-" + r.status}>{STATUS[r.status]}</span></h3>
++              <StatusTrack status={r.status} />
++              <Recommendation rec={r.recommendation} />
++              {r.decisions.map((d, i) => <p key={i} className="decision">{STATUS[d.decision]}. {d.reason}</p>)}
++              {!closed && (
++                <div className="decide">
++                  <label>Motif de votre décision
++                    <textarea rows="2" value={reasons[r.id] || ""} onChange={(e) => setReasons({ ...reasons, [r.id]: e.target.value })} />
++                  </label>
++                  <div className="row">
++                    <button className="primary" onClick={() => decide(r.id, "approved")}>Approuver</button>
++                    <button onClick={() => decide(r.id, "needs_info")}>Demander un complément</button>
++                    <button className="danger" onClick={() => decide(r.id, "rejected")}>Refuser</button>
++                  </div>
+                 </div>
+-              </div>
+-            )}
+-          </article>
+-        );
+-      })}
+-    </section>
++              )}
++            </article>
++          );
++        })}
++      </section>
++    </div>
+   );
+ }
+diff --git a/frontend-app/src/EmailLinks.jsx b/frontend-app/src/EmailLinks.jsx
+index 92bac6c..6635885 100644
+--- a/frontend-app/src/EmailLinks.jsx
++++ b/frontend-app/src/EmailLinks.jsx
+@@ -9,11 +9,11 @@ export function VerifyEmail({ token, onDone }) {
+     api.verifyEmail(token).then((r) => { setMsg(r.message); setOk(true); }).catch((e) => setMsg(e.message));
+   }, [token]);
+   return (
+-    <section className="card narrow">
++    <section className="auth"><div className="panel">
+       <h2>Confirmation de l'email</h2>
+       <p className={ok ? "ok" : "error"}>{msg}</p>
+       <button className="primary" onClick={onDone}>Aller à la connexion</button>
+-    </section>
++    </div></section>
+   );
+ }
+ 
+@@ -26,7 +26,7 @@ export function ResetPassword({ token, onDone }) {
+     try { setMsg((await api.resetPassword(token, password)).message); setOk(true); } catch (err) { setMsg(err.message); }
+   };
+   return (
+-    <section className="card narrow">
++    <section className="auth"><div className="panel">
+       <h2>Nouveau mot de passe</h2>
+       {!ok && (
+         <form onSubmit={submit}>
+@@ -37,6 +37,6 @@ export function ResetPassword({ token, onDone }) {
+       )}
+       {msg && <p className={ok ? "ok" : "error"}>{msg}</p>}
+       {ok && <button className="primary" onClick={onDone}>Aller à la connexion</button>}
+-    </section>
++    </div></section>
+   );
+ }
+diff --git a/frontend-app/src/Home.jsx b/frontend-app/src/Home.jsx
+new file mode 100644
+index 0000000..0d313ae
+--- /dev/null
++++ b/frontend-app/src/Home.jsx
+@@ -0,0 +1,54 @@
++import React, { useRef } from "react";
++import gsap from "gsap";
++import { useGSAP } from "@gsap/react";
++import { D, EASE, reduced } from "./motion.js";
++
++gsap.registerPlugin(useGSAP);
++
++export default function Home({ onChoose }) {
++  const root = useRef(null);
++
++  // Le seul mouvement spontané de la page : une séquence d'arrivée.
++  useGSAP(() => {
++    if (reduced()) return;
++    gsap.timeline({ defaults: { ease: EASE.out } })
++      .from(".hl", { yPercent: 110, duration: D.slow, stagger: 0.1 })
++      .from(".home-intro", { opacity: 0, y: 14, duration: D.base }, "-=0.4")
++      .from(".role-card", { opacity: 0, y: 40, duration: D.slow, stagger: 0.12 }, "-=0.3")
++      .from(".facts li", { opacity: 0, y: 10, duration: D.base, stagger: 0.07 }, "-=0.4");
++  }, { scope: root });
++
++  return (
++    <div ref={root} className="home">
++      <h1>
++        <span className="mask"><span className="hl">Préparez votre dossier d'immigration.</span></span>
++        <span className="mask"><span className="hl hl-soft">Un consultant humain décide.</span></span>
++      </h1>
++      <p className="home-intro">
++        Un assistant vérifie votre identité et contrôle les critères officiels. Vous gardez la main sur votre dossier, et
++        un consultant prend la décision finale.
++      </p>
++      <div className="role-grid">
++        <button className="role-card candidate" onClick={() => onChoose("candidate")}>
++          <span className="role-body">
++            <strong>Candidat</strong>
++            <span>Créez votre compte, faites vérifier votre identité, puis déposez votre demande.</span>
++            <span className="role-go">Entrer dans mon espace</span>
++          </span>
++        </button>
++        <button className="role-card consultant" onClick={() => onChoose("consultant")}>
++          <span className="role-body">
++            <strong>Consultant</strong>
++            <span>Examinez les demandes recommandées par l'assistant et rendez votre décision.</span>
++            <span className="role-go">Entrer dans mon espace</span>
++          </span>
++        </button>
++      </div>
++      <ul className="facts">
++        <li>Identité vérifiée automatiquement : CIN et visage en direct.</li>
++        <li>Critères contrôlés par des règles officielles, avec leurs sources.</li>
++        <li>Aucune demande n'est envoyée sans décision d'un consultant.</li>
++      </ul>
++    </div>
++  );
++}
+diff --git a/frontend-app/src/LiveCheck.jsx b/frontend-app/src/LiveCheck.jsx
+index b5abd16..52c0cdf 100644
+--- a/frontend-app/src/LiveCheck.jsx
++++ b/frontend-app/src/LiveCheck.jsx
+@@ -1,17 +1,26 @@
+ import React, { useEffect, useRef, useState } from "react";
++import gsap from "gsap";
++import { useGSAP } from "@gsap/react";
+ import { api } from "./api.js";
++import { D, EASE } from "./motion.js";
+ 
+-const COUNTDOWN = 3; // secondes avant chaque capture
++gsap.registerPlugin(useGSAP);
+ 
+-// Défi webcam en direct : l'écran demande une suite de poses ; une image est capturée après chaque compte à rebours.
++const COUNTDOWN = 3;
++const RADIUS = 146;
++const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
++
++// Une seule photo prise en direct : on se place, puis un compte à rebours referme l'anneau et la photo est prise.
+ export default function LiveCheck({ onDone, onCancel }) {
++  const root = useRef(null);
+   const video = useRef(null);
+   const stream = useRef(null);
+-  const [phase, setPhase] = useState("idle"); // idle | running | error
++  const challenge = useRef(null);
++  const [phase, setPhase] = useState("idle"); // idle | ready | counting | error
++  const [count, setCount] = useState(COUNTDOWN);
+   const [error, setError] = useState("");
+-  const [instruction, setInstruction] = useState("");
+-  const [count, setCount] = useState(0);
+-  const [progress, setProgress] = useState([0, 0]);
++
++  const { contextSafe } = useGSAP({ scope: root });
+ 
+   useEffect(() => () => stop(), []);
+ 
+@@ -20,69 +29,73 @@ export default function LiveCheck({ onDone, onCancel }) {
+     stream.current = null;
+   }
+ 
+-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+-
+-  async function run() {
++  const openCamera = async () => {
+     setError("");
+     try {
+-      const ch = await api.challenge();
++      challenge.current = await api.challenge();
+       stream.current = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+-      setPhase("running");
+-      await wait(50);
++      setPhase("ready");
++      await new Promise((r) => setTimeout(r, 30));
+       video.current.srcObject = stream.current;
+       await video.current.play();
+-      const frames = [];
+-      for (let i = 0; i < ch.steps.length; i++) {
+-        setProgress([i + 1, ch.steps.length]);
+-        setInstruction(ch.steps[i].text);
+-        for (let c = COUNTDOWN; c > 0; c--) {
+-          setCount(c);
+-          await wait(1000);
+-        }
+-        setCount(0);
+-        frames.push(await snap());
+-      }
+-      stop();
+-      onDone({ token: ch.token, frames });
+     } catch (err) {
+       stop();
+       setPhase("error");
+       setError(err.name === "NotAllowedError" || err.name === "NotFoundError"
+-        ? "Caméra indisponible ou refusée. Autorisez la caméra dans le navigateur puis réessayez."
++        ? "Caméra indisponible ou refusée. Autorisez la caméra dans votre navigateur, puis réessayez."
+         : err.message);
+     }
+-  }
++  };
+ 
+-  function snap() {
++  const fillRing = contextSafe(() => new Promise((resolve) => {
++    gsap.fromTo(".ring-progress", { strokeDashoffset: CIRCUMFERENCE }, {
++      strokeDashoffset: 0, duration: COUNTDOWN, ease: "none",
++      onUpdate() { setCount(Math.max(1, Math.ceil(COUNTDOWN * (1 - this.progress())))); },
++      onComplete: resolve,
++    });
++  }));
++
++  const flash = contextSafe(() => gsap.fromTo(".flash", { opacity: 0.95 }, { opacity: 0, duration: D.base, ease: EASE.out }));
++
++  const capture = async () => {
++    setPhase("counting");
++    await fillRing();
+     const v = video.current;
+     const canvas = document.createElement("canvas");
+     canvas.width = v.videoWidth;
+     canvas.height = v.videoHeight;
+-    canvas.getContext("2d").drawImage(v, 0, 0); // image NON inversée (l'aperçu à l'écran, lui, est en miroir)
+-    return new Promise((resolve) => canvas.toBlob((b) => resolve(new File([b], "frame.jpg", { type: "image/jpeg" })), "image/jpeg", 0.92));
+-  }
++    canvas.getContext("2d").drawImage(v, 0, 0); // image non inversée ; l'aperçu à l'écran, lui, est en miroir
++    flash();
++    const blob = await new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.92));
++    stop();
++    onDone({ token: challenge.current.token, frames: [new File([blob], "live.jpg", { type: "image/jpeg" })] });
++  };
++
++  const live = phase === "ready" || phase === "counting";
+ 
+   return (
+-    <div className="camera">
+-      {phase === "running" ? (
+-        <>
+-          <p className="instruction">Étape {progress[0]}/{progress[1]} : {instruction}</p>
+-          <div className="videobox">
+-            <video ref={video} autoPlay playsInline muted className="mirror" />
+-            {count > 0 && <span className="count">{count}</span>}
+-          </div>
+-          <p className="hint">Gardez votre visage bien éclairé et dans le cadre. La photo est prise automatiquement.</p>
+-        </>
+-      ) : (
+-        <>
+-          <p>Vérification en direct : l'écran vous demandera 4 poses (par exemple regarder la caméra, puis tourner la tête). Cela prend environ 15 secondes.</p>
+-          <div className="row">
+-            <button type="button" className="primary" onClick={run}>{phase === "error" ? "Réessayer" : "Démarrer la caméra"}</button>
+-            {onCancel && <button type="button" onClick={onCancel}>Retour</button>}
+-          </div>
+-        </>
+-      )}
++    <div ref={root} className="scan">
++      <div className={"scan-frame" + (live ? " on" : "")}>
++        <div className="scan-video">
++          <video ref={video} autoPlay playsInline muted className="mirror" />
++          {phase === "counting" && <span className="count" aria-live="polite">{count}</span>}
++          <span className="flash" />
++        </div>
++        <svg className="ring" viewBox="0 0 300 300" aria-hidden="true">
++          <circle className="ring-track" cx="150" cy="150" r={RADIUS} />
++          <circle className="ring-progress" cx="150" cy="150" r={RADIUS}
++                  strokeDasharray={CIRCUMFERENCE} strokeDashoffset={CIRCUMFERENCE} transform="rotate(-90 150 150)" />
++        </svg>
++      </div>
++      {phase === "ready" && <p className="scan-tip">Placez votre visage dans le cercle, regardez la caméra, puis prenez la photo.</p>}
++      {phase === "counting" && <p className="scan-tip">Ne bougez plus, regardez la caméra.</p>}
++      {!live && phase !== "error" && <p className="scan-tip">Une seule photo, prise en direct. Bonne lumière, visage de face, sans lunettes de soleil.</p>}
+       {error && <p className="error" role="alert">{error}</p>}
++      <div className="row center">
++        {!live && <button type="button" className="primary" onClick={openCamera}>{phase === "error" ? "Réessayer" : "Ouvrir la caméra"}</button>}
++        {phase === "ready" && <button type="button" className="primary" onClick={capture}>Prendre la photo</button>}
++        {phase !== "counting" && onCancel && <button type="button" onClick={onCancel}>Retour</button>}
++      </div>
+     </div>
+   );
+ }
+diff --git a/frontend-app/src/Signup.jsx b/frontend-app/src/Signup.jsx
+index 8d08371..a3d8323 100644
+--- a/frontend-app/src/Signup.jsx
++++ b/frontend-app/src/Signup.jsx
+@@ -1,8 +1,13 @@
+-import React, { useEffect, useState } from "react";
++import React, { useEffect, useRef, useState } from "react";
+ import { api } from "./api.js";
+ import LiveCheck from "./LiveCheck.jsx";
++import Stepper from "./Stepper.jsx";
++import { usePanelMotion } from "./usePanelMotion.js";
++
++const LABELS = ["Informations", "Votre CIN", "Votre visage"];
+ 
+ export default function Signup({ onBack }) {
++  const root = useRef(null);
+   const [step, setStep] = useState(1);
+   const [f, setF] = useState({ full_name: "", email: "", password: "", cin: "" });
+   const [cinFile, setCinFile] = useState(null);
+@@ -13,6 +18,8 @@ export default function Signup({ onBack }) {
+   const [done, setDone] = useState(null);
+   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+ 
++  usePanelMotion(root, step + (done ? "-done" : ""));
++
+   useEffect(() => {
+     if (!cinFile) return setPreview("");
+     const url = URL.createObjectURL(cinFile);
+@@ -29,12 +36,11 @@ export default function Signup({ onBack }) {
+       Object.entries(f).forEach(([k, v]) => form.append(k, v));
+       form.append("token", token);
+       form.append("cin_image", cinFile, cinFile.name || "cin.jpg");
+-      frames.forEach((fr, i) => form.append("frames", fr, `frame${i}.jpg`));
++      frames.forEach((fr, i) => form.append("frames", fr, `live${i}.jpg`));
+       setDone(await api.signup(form));
+     } catch (err) {
+       setError(err.message);
+       setReasons(err.reasons || []);
+-      setStep(3);
+     } finally {
+       setBusy(false);
+     }
+@@ -42,60 +48,65 @@ export default function Signup({ onBack }) {
+ 
+   if (done) {
+     return (
+-      <section className="card narrow">
+-        <h2>Identité vérifiée ✔</h2>
+-        <p>Votre compte est créé.</p>
+-        {done.email_confirmation_required && <p>Un email de confirmation vient d'être envoyé : cliquez sur le lien qu'il contient, puis connectez-vous.</p>}
+-        <button className="primary" onClick={onBack}>Aller à la connexion</button>
+-      </section>
++      <div ref={root} className="auth-body">
++        <div className="panel success">
++          <h2>Identité vérifiée, compte créé</h2>
++          {done.email_confirmation_required
++            ? <p>Un email de confirmation vient d'être envoyé. Ouvrez le lien qu'il contient, puis connectez-vous.</p>
++            : <p>Vous pouvez maintenant vous connecter.</p>}
++          <button className="primary" onClick={onBack}>Aller à la connexion</button>
++        </div>
++      </div>
+     );
+   }
+ 
+   return (
+-    <section className="card narrow">
+-      <p className="hint">Étape {step} sur 3 — le compte n'est créé qu'une fois votre identité vérifiée.</p>
+-      {step === 1 && (
+-        <form onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
+-          <h2>Vos informations</h2>
+-          <label>Nom complet <input value={f.full_name} onChange={set("full_name")} required maxLength={120} autoComplete="name" /></label>
+-          <label>Adresse email <input type="email" value={f.email} onChange={set("email")} required autoComplete="email" /></label>
+-          <label>Mot de passe <small>(10 caractères minimum)</small>
+-            <input type="password" value={f.password} onChange={set("password")} required minLength={10} autoComplete="new-password" /></label>
+-          <label>Numéro de CIN <small>(1 à 3 lettres puis 6 à 8 chiffres, ex. AB123456)</small>
+-            <input value={f.cin} onChange={set("cin")} required maxLength={20} pattern="\s*[A-Za-z]{1,3}[\s\-]?[0-9]{6,8}\s*" title="Ex. AB123456" /></label>
+-          <button className="primary">Continuer</button>
+-          <button type="button" className="link" onClick={onBack}>← Retour à la connexion</button>
+-        </form>
+-      )}
+-      {step === 2 && (
+-        <div className="camera">
+-          <h2>Votre CIN</h2>
+-          <p>Envoyez une photo ou un scan <strong>net</strong> du recto de votre CIN : la photo du titulaire et le numéro doivent être lisibles. Utilisez uniquement votre propre carte.</p>
+-          {preview && <img src={preview} alt="Aperçu de la CIN" className="preview" />}
+-          <label className="filebtn">
+-            {cinFile ? "Choisir une autre image" : "Choisir ou photographier la CIN"}
+-            <input type="file" accept="image/jpeg,image/png" capture="environment" hidden onChange={(e) => e.target.files[0] && setCinFile(e.target.files[0])} />
+-          </label>
+-          <div className="row">
+-            <button className="primary" disabled={!cinFile} onClick={() => setStep(3)}>Continuer</button>
+-            <button onClick={() => setStep(1)}>Retour</button>
+-          </div>
+-        </div>
+-      )}
+-      {step === 3 && (
+-        <div>
+-          <h2>Vérification en direct</h2>
+-          {reasons.length > 0 && (
+-            <div className="notice" role="alert">
+-              <strong>{error}</strong>
+-              <ul>{reasons.map((r) => <li key={r}>{r}</li>)}</ul>
++    <div ref={root} className="auth-body">
++      <Stepper labels={LABELS} step={step} />
++      <div className="panel">
++        {step === 1 && (
++          <form onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
++            <h2>Vos informations</h2>
++            <label>Nom complet <input value={f.full_name} onChange={set("full_name")} required maxLength={120} autoComplete="name" /></label>
++            <label>Adresse email <input type="email" value={f.email} onChange={set("email")} required autoComplete="email" /></label>
++            <label>Mot de passe <small>10 caractères minimum</small>
++              <input type="password" value={f.password} onChange={set("password")} required minLength={10} autoComplete="new-password" /></label>
++            <label>Numéro de CIN <small>1 à 3 lettres puis 6 à 8 chiffres, par exemple AB123456</small>
++              <input value={f.cin} onChange={set("cin")} required maxLength={20} pattern="\s*[A-Za-z]{1,3}[\s\-]?[0-9]{6,8}\s*" title="Par exemple AB123456" /></label>
++            <button className="primary">Continuer</button>
++          </form>
++        )}
++        {step === 2 && (
++          <div>
++            <h2>Votre CIN</h2>
++            <p>Envoyez une photo ou un scan net du recto : la photo du titulaire et le numéro doivent être lisibles. Utilisez uniquement votre propre carte.</p>
++            {preview && <img src={preview} alt="Aperçu de la CIN" className="cin-preview" />}
++            <label className="filebtn">
++              {cinFile ? "Choisir une autre image" : "Choisir ou photographier la CIN"}
++              <input type="file" accept="image/jpeg,image/png" capture="environment" hidden onChange={(e) => e.target.files[0] && setCinFile(e.target.files[0])} />
++            </label>
++            <div className="row">
++              <button className="primary" disabled={!cinFile} onClick={() => setStep(3)}>Continuer</button>
++              <button onClick={() => setStep(1)}>Retour</button>
+             </div>
+-          )}
+-          {error && reasons.length === 0 && <p className="error" role="alert">{error}</p>}
+-          {busy ? <p>Vérification en cours…</p> : <LiveCheck onDone={submit} onCancel={() => setStep(2)} />}
+-          <p className="hint">Limite connue : cette vérification compare votre visage en direct à la photo de la CIN ; elle ne constitue pas une preuve absolue.</p>
+-        </div>
+-      )}
+-    </section>
++          </div>
++        )}
++        {step === 3 && (
++          <div>
++            <h2>Votre visage, en direct</h2>
++            {reasons.length > 0 && (
++              <div className="notice" role="alert">
++                <strong>{error}</strong>
++                <ul>{reasons.map((r) => <li key={r}>{r}</li>)}</ul>
++              </div>
++            )}
++            {error && reasons.length === 0 && <p className="error" role="alert">{error}</p>}
++            {busy ? <p className="muted">Vérification en cours…</p> : <LiveCheck key={reasons.length + error} onDone={submit} onCancel={() => setStep(2)} />}
++            <p className="hint">Votre visage est comparé à la photo de la CIN. Ce contrôle automatique n'est pas une preuve absolue.</p>
++          </div>
++        )}
++      </div>
++      <button className="link" onClick={onBack}>Retour à la connexion</button>
++    </div>
+   );
+ }
+diff --git a/frontend-app/src/StatusTrack.jsx b/frontend-app/src/StatusTrack.jsx
+new file mode 100644
+index 0000000..f6bed61
+--- /dev/null
++++ b/frontend-app/src/StatusTrack.jsx
+@@ -0,0 +1,31 @@
++import React, { useRef } from "react";
++import gsap from "gsap";
++import { useGSAP } from "@gsap/react";
++import { D, EASE, reduced } from "./motion.js";
++
++gsap.registerPlugin(useGSAP);
++
++const STAGES = ["Envoyée", "En examen", "Décision"];
++const STAGE_OF = { awaiting_review: 2, needs_info: 2, approved: 3, rejected: 3 };
++
++// Suite réelle : la demande avance de l'envoi à la décision.
++export default function StatusTrack({ status }) {
++  const root = useRef(null);
++  const stage = STAGE_OF[status] || 1;
++  const done = status === "approved" || status === "rejected";
++
++  useGSAP(() => {
++    const to = (stage - (done ? 0 : 0.5)) / STAGES.length;
++    if (reduced()) gsap.set(".track-fill", { scaleX: to });
++    else gsap.fromTo(".track-fill", { scaleX: 0 }, { scaleX: to, duration: D.slow, ease: EASE.out });
++  }, { scope: root, dependencies: [stage, done] });
++
++  return (
++    <div ref={root} className={"track s-" + status}>
++      <div className="track-line"><span className="track-fill" /></div>
++      <ol>
++        {STAGES.map((label, i) => <li key={label} className={i + 1 <= stage ? "reached" : ""}>{label}</li>)}
++      </ol>
++    </div>
++  );
++}
+diff --git a/frontend-app/src/Stepper.jsx b/frontend-app/src/Stepper.jsx
+new file mode 100644
+index 0000000..892314a
+--- /dev/null
++++ b/frontend-app/src/Stepper.jsx
+@@ -0,0 +1,27 @@
++import React, { useRef } from "react";
++import gsap from "gsap";
++import { useGSAP } from "@gsap/react";
++import { D, EASE } from "./motion.js";
++
++gsap.registerPlugin(useGSAP);
++
++// Vraie suite d'étapes : le trait se remplit quand on avance.
++export default function Stepper({ labels, step }) {
++  const root = useRef(null);
++  useGSAP(() => {
++    gsap.to(".steps-fill", { scaleX: step / labels.length, duration: D.base, ease: EASE.inOut });
++  }, { scope: root, dependencies: [step] });
++
++  return (
++    <div ref={root} className="stepper">
++      <div className="steps-track"><span className="steps-fill" /></div>
++      <ol>
++        {labels.map((label, i) => (
++          <li key={label} className={i + 1 < step ? "done" : i + 1 === step ? "now" : ""} aria-current={i + 1 === step ? "step" : undefined}>
++            {label}
++          </li>
++        ))}
++      </ol>
++    </div>
++  );
++}
+diff --git a/frontend-app/src/motion.js b/frontend-app/src/motion.js
+new file mode 100644
+index 0000000..7dd0bd4
+--- /dev/null
++++ b/frontend-app/src/motion.js
+@@ -0,0 +1,4 @@
++// Durées et courbes en un seul endroit ; on n'anime que transform, opacity et le tracé SVG.
++export const D = { fast: 0.25, base: 0.45, slow: 0.8 };
++export const EASE = { out: "power3.out", inOut: "power2.inOut" };
++export const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+diff --git a/frontend-app/src/styles.css b/frontend-app/src/styles.css
+index 7c2aa38..aa1afee 100644
+--- a/frontend-app/src/styles.css
++++ b/frontend-app/src/styles.css
+@@ -1,39 +1,166 @@
+-:root { --bg:#f5f6f8; --card:#fff; --ink:#1c2430; --muted:#667085; --line:#e2e5ea; --brand:#1f5eff; --ok:#177245; --bad:#b42318; --warn:#b54708; }
+-@media (prefers-color-scheme: dark) { :root { --bg:#12161c; --card:#1b212a; --ink:#e8ecf2; --muted:#98a2b3; --line:#2d3643; --brand:#6c9bff; --ok:#4ec28a; --bad:#ff8b80; --warn:#f5b36b; } }
++@property --edge-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
++
++:root {
++  --ink: #352020; --ink-soft: #6f5a58; --rose: #af274f; --berry: #f23378; --amber: #ff850b;
++  --blush: #fff2f6; --apricot: #fff5e2; --paper: #fffaf8; --line: #f0d8d0; --green: #177245; --green-bg: #e6f5ec;
++  --red: #a4161a; --red-bg: #fdeaea; --warn-bg: #fff1d6;
++  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
++  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
++}
+ * { box-sizing: border-box; }
+-body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, "Segoe UI", sans-serif; }
+-.shell { min-height:100vh; display:flex; flex-direction:column; }
+-.top { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:var(--card); border-bottom:1px solid var(--line); }
+-.who { display:flex; gap:12px; align-items:center; font-size:14px; color:var(--muted); }
+-main { flex:1; width:100%; max-width:860px; margin:0 auto; padding:20px 16px; display:grid; gap:16px; align-content:start; }
+-.foot { padding:16px; text-align:center; font-size:13px; color:var(--muted); }
+-.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; }
+-.narrow { max-width:440px; margin:24px auto; width:100%; }
+-h2 { margin:0 0 12px; font-size:20px; } h3 { margin:0 0 8px; font-size:16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+-form { display:grid; gap:12px; }
+-label { display:grid; gap:4px; font-size:14px; font-weight:600; } label small { font-weight:400; color:var(--muted); }
+-input, select, textarea { font:inherit; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); width:100%; }
+-input:focus, select:focus, textarea:focus, button:focus-visible { outline:2px solid var(--brand); outline-offset:1px; }
+-button { font:inherit; padding:9px 14px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink); cursor:pointer; }
+-button.primary { background:var(--brand); border-color:var(--brand); color:#fff; font-weight:600; }
+-button.danger { color:var(--bad); border-color:var(--bad); }
+-button:disabled { opacity:.5; cursor:not-allowed; }
+-button.link { border:0; background:none; color:var(--brand); padding:4px; } button.small { font-size:13px; }
+-.tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; } .tabs button.on { background:var(--brand); color:#fff; border-color:var(--brand); }
+-.row { display:flex; flex-wrap:wrap; gap:8px; } .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+-@media (max-width:640px) { .grid2 { grid-template-columns:1fr; } }
+-.filebtn { display:inline-block; padding:9px 14px; border:1px solid var(--line); border-radius:8px; cursor:pointer; font-weight:400; }
+-.camera { display:grid; gap:8px; align-content:start; } video, .preview { width:100%; max-height:260px; object-fit:cover; border-radius:8px; background:#000; }
+-.error { color:var(--bad); margin:0; } .ok { color:var(--ok); font-weight:600; } .muted { color:var(--muted); font-size:14px; } .hint { color:var(--muted); font-size:13px; margin:0; }
+-.notice { border:1px solid var(--warn); border-radius:8px; padding:10px 14px; margin:12px 0; } .notice ul { margin:6px 0 0; padding-left:20px; }
+-.plain { list-style:none; padding:0; margin:0 0 12px; display:grid; gap:4px; }
+-.req { border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
+-.status { font-size:12px; font-weight:600; padding:2px 8px; border-radius:99px; border:1px solid var(--line); }
+-.s-approved { color:var(--ok); border-color:var(--ok); } .s-rejected { color:var(--bad); border-color:var(--bad); } .s-needs_info { color:var(--warn); border-color:var(--warn); }
+-.rec ul { list-style:none; padding:0; display:grid; gap:8px; } .badge { font-size:12px; font-weight:600; padding:1px 8px; border-radius:6px; border:1px solid var(--line); margin-right:6px; }
+-.v-MEETS .badge { color:var(--ok); border-color:var(--ok); } .v-DOES_NOT_MEET .badge { color:var(--bad); border-color:var(--bad); } .v-UNKNOWN .badge { color:var(--warn); border-color:var(--warn); }
+-.decision { background:var(--bg); border-radius:8px; padding:8px 12px; }
+-.center { text-align:center; padding:40px; }
+-.videobox { position:relative; } .mirror { transform:scaleX(-1); }
+-.count { position:absolute; inset:0; display:grid; place-items:center; font-size:72px; font-weight:700; color:#fff; text-shadow:0 2px 8px #000; }
+-.instruction { font-size:18px; font-weight:600; margin:0; }
++html { -webkit-text-size-adjust: 100%; }
++body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--body);
++  background-image: radial-gradient(60rem 30rem at 85% -10%, #ffe3ec 0%, transparent 60%), radial-gradient(50rem 28rem at -10% 0%, #ffedd2 0%, transparent 55%);
++  background-repeat: no-repeat; min-height: 100vh; }
++h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; line-height: 1.12; margin: 0 0 .6rem; }
++h1 { font-size: clamp(2rem, 5.2vw, 3.4rem); font-weight: 800; }
++h2 { font-size: 1.5rem; font-weight: 700; }
++h3 { font-size: 1.1rem; font-weight: 700; }
++p { margin: 0 0 .8rem; max-width: 66ch; }
++small { display: block; color: var(--ink-soft); font-weight: 400; font-size: .85rem; }
++:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; border-radius: 6px; }
++
++.shell { max-width: 1040px; margin: 0 auto; padding: 0 1.25rem; min-height: 100vh; display: flex; flex-direction: column; }
++main { flex: 1; padding: 1.5rem 0 3rem; }
++.top { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 0; }
++.brand { display: flex; align-items: center; gap: .6rem; font: 800 1.15rem var(--display); letter-spacing: -0.01em; }
++.mark { width: 1.5rem; height: 1.5rem; border-radius: 55% 45% 60% 40%; background: conic-gradient(from 200deg, var(--berry), var(--amber), var(--berry)); }
++.who { display: flex; align-items: center; gap: .9rem; font-weight: 600; }
++.foot { color: var(--ink-soft); font-size: .85rem; padding: 1.2rem 0 2rem; border-top: 1px solid var(--line); }
++.muted { color: var(--ink-soft); }
++.hint { color: var(--ink-soft); font-size: .9rem; margin-top: 1rem; }
++.empty { color: var(--ink-soft); }
++
++/* Boutons et champs */
++button { font: 600 1rem var(--body); color: var(--ink); background: #fff; border: 1.5px solid var(--line); border-radius: 12px;
++  padding: .65rem 1.15rem; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
++button:hover:not(:disabled) { border-color: var(--rose); }
++button:active:not(:disabled) { transform: scale(.97); }
++button:disabled { opacity: .5; cursor: not-allowed; }
++button.primary { background: var(--rose); border-color: var(--rose); color: #fff; }
++button.primary:hover:not(:disabled) { background: #8f1d3f; }
++button.danger { color: var(--red); border-color: #efb9bb; }
++button.link { background: none; border: 0; padding: .3rem 0; color: var(--rose); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
++.filebtn { display: inline-block; margin: .5rem 0 1rem; border: 1.5px dashed var(--rose); color: var(--rose); border-radius: 12px; padding: .75rem 1.2rem; font-weight: 600; cursor: pointer; }
++.filebtn:focus-within { outline: 3px solid var(--amber); outline-offset: 2px; }
++label { display: block; font-weight: 600; margin-bottom: 1rem; }
++input, select, textarea { display: block; width: 100%; margin-top: .35rem; font: 400 1rem var(--body); color: var(--ink); background: #fff;
++  border: 1.5px solid var(--line); border-radius: 10px; padding: .65rem .8rem; }
++input:focus, select:focus, textarea:focus { outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px #f9c5d4; }
++.row { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: .5rem; }
++.row.center { justify-content: center; }
++.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 1rem; }
++.error { color: var(--red); background: var(--red-bg); border-radius: 10px; padding: .6rem .8rem; }
++.ok { color: var(--green); background: var(--green-bg); border-radius: 10px; padding: .6rem .8rem; }
++.notice { background: var(--warn-bg); border-radius: 14px; padding: .8rem 1rem; margin-bottom: 1rem; }
++.notice ul { margin: .4rem 0 0; padding-left: 1.2rem; }
++.chip { display: inline-block; font-size: .85rem; font-weight: 700; border-radius: 999px; padding: .15rem .7rem; margin-right: .5rem; }
++.chip.ok { background: var(--green-bg); color: var(--green); }
++
++/* Panneaux */
++.panel { background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 1.6rem; box-shadow: 0 18px 40px -28px rgba(175, 39, 79, .45); }
++.panel.success { text-align: center; }
++.panel.success p { margin-inline: auto; }
++
++/* Accueil */
++.home { padding-top: 1.5rem; }
++.home h1 { max-width: 16ch; }
++.mask { display: block; overflow: hidden; padding-bottom: .12em; }
++.hl { display: block; }
++.hl-soft { color: var(--rose); }
++.home-intro { font-size: 1.1rem; color: var(--ink-soft); margin: 1.1rem 0 2rem; }
++.role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
++.role-card { position: relative; text-align: left; padding: 3px; border: 0; border-radius: 28px; background: var(--line); cursor: pointer; isolation: isolate; }
++.role-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -2; opacity: 0; transition: opacity .3s;
++  background: conic-gradient(from var(--edge-angle), var(--edge), transparent 30%, var(--edge) 55%, transparent 80%, var(--edge)); }
++.role-card:hover::before, .role-card:focus-visible::before { opacity: 1; animation: spin 3.2s linear infinite; }
++.role-card.candidate { --edge: var(--berry); --card: var(--blush); }
++.role-card.consultant { --edge: var(--amber); --card: var(--apricot); }
++.role-body { display: flex; flex-direction: column; gap: .6rem; background: var(--card); border-radius: 25px; padding: 1.8rem 1.6rem; min-height: 14rem; }
++.role-body strong { font: 800 1.9rem var(--display); letter-spacing: -0.02em; }
++.role-go { margin-top: auto; font-weight: 700; color: var(--rose); }
++.role-card:hover .role-go { text-decoration: underline; text-underline-offset: 4px; }
++@keyframes spin { to { --edge-angle: 360deg; } }
++.facts { list-style: none; padding: 0; margin: 3rem 0 0; display: grid; gap: .5rem; color: var(--ink-soft); }
++.facts li { padding-left: 1.4rem; position: relative; }
++.facts li::before { content: ""; position: absolute; left: 0; top: .6em; width: .6rem; height: .6rem; border-radius: 50%; background: var(--amber); }
++
++/* Authentification */
++.auth { max-width: 600px; margin: 0 auto; }
++.auth.consultant .tabs .on, .auth.consultant .primary { --accent: var(--amber); }
++.auth-title { font-size: clamp(1.6rem, 4vw, 2.2rem); }
++.back { margin-bottom: .6rem; }
++.auth-body { display: grid; gap: 1rem; }
++.tabs, .subnav { display: flex; gap: .4rem; background: var(--blush); border-radius: 999px; padding: .3rem; margin-bottom: 1.3rem; width: fit-content; max-width: 100%; }
++.auth.consultant .tabs, .consultant .subnav { background: var(--apricot); }
++.tabs button, .subnav button { border: 0; background: transparent; border-radius: 999px; padding: .5rem 1.1rem; }
++.tabs .on, .subnav .on { background: #fff; color: var(--rose); box-shadow: 0 2px 8px -3px rgba(53, 32, 32, .3); }
++.cin-preview { display: block; max-width: 100%; max-height: 220px; border-radius: 14px; border: 1px solid var(--line); margin: .6rem 0; }
++
++/* Étapes */
++.stepper { position: relative; padding-bottom: 1.2rem; }
++.stepper ol { list-style: none; display: flex; justify-content: space-between; margin: 0; padding: 0; counter-reset: s; }
++.stepper li { flex: 1; font-weight: 600; color: var(--ink-soft); padding-top: .7rem; font-size: .95rem; }
++.stepper li.now { color: var(--rose); } .stepper li.done { color: var(--ink); }
++.steps-track { position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }
++.steps-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--berry), var(--amber)); transform-origin: left; transform: scaleX(0); }
++
++/* Scan du visage */
++.scan { display: grid; gap: .8rem; justify-items: center; }
++.scan-frame { position: relative; width: min(300px, 80vw); aspect-ratio: 1; }
++.scan-video { position: absolute; inset: 14px; border-radius: 50%; overflow: hidden; background: #2a1a1a radial-gradient(circle at 50% 40%, #4a3333, #241616); }
++.scan-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
++.mirror { transform: scaleX(-1); }
++.ring { position: absolute; inset: 0; width: 100%; height: 100%; }
++.ring-track { fill: none; stroke: var(--line); stroke-width: 6; }
++.ring-progress { fill: none; stroke: var(--rose); stroke-width: 8; stroke-linecap: round; }
++.scan-frame.on .ring-track { stroke: #f4bfcf; }
++.count { position: absolute; inset: 0; display: grid; place-items: center; font: 800 5rem var(--display); color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, .5); }
++.flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
++.scan-tip { text-align: center; color: var(--ink-soft); max-width: 40ch; margin: 0; }
++
++/* Candidat et consultant */
++.welcome h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
++.counts { align-items: stretch; display: grid; grid-template-columns: repeat(5, 1fr); gap: .8rem; margin: 1.2rem 0; }
++.count-card { text-align: left; border-radius: 18px; background: var(--apricot); border-color: transparent; display: grid; gap: .1rem; padding: .9rem 1rem; }
++.count-card strong { font: 800 1.9rem var(--display); }
++.count-card span { font-size: .85rem; color: var(--ink-soft); }
++.count-card.on { background: #fff; border-color: var(--amber); }
++.req { border-top: 1px solid var(--line); padding: 1.1rem 0; }
++.req:first-of-type { border-top: 0; }
++.status { font: 700 .8rem var(--body); border-radius: 999px; padding: .2rem .7rem; margin-left: .4rem; background: var(--warn-bg); vertical-align: middle; }
++.status.s-approved { background: var(--green-bg); color: var(--green); }
++.status.s-rejected { background: var(--red-bg); color: var(--red); }
++.decision { background: var(--blush); border-radius: 12px; padding: .6rem .8rem; }
++.decide { background: var(--apricot); border-radius: 16px; padding: 1rem; margin-top: .8rem; }
++.facts-list { display: grid; gap: .6rem; margin: 0 0 1rem; }
++.facts-list div { display: flex; gap: 1rem; border-bottom: 1px solid var(--line); padding-bottom: .5rem; }
++.facts-list dt { width: 8rem; color: var(--ink-soft); } .facts-list dd { margin: 0; font-weight: 600; }
++
++/* Suivi d'une demande */
++.track { margin: .6rem 0 1rem; }
++.track-line { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
++.track-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--berry), var(--amber)); transform-origin: left; }
++.track.s-approved .track-fill { background: var(--green); }
++.track.s-rejected .track-fill { background: var(--red); }
++.track ol { list-style: none; display: flex; justify-content: space-between; margin: .4rem 0 0; padding: 0; font-size: .85rem; color: var(--ink-soft); }
++.track li.reached { color: var(--ink); font-weight: 700; }
++
++/* Avis de l'assistant */
++.rec { background: var(--blush); border-radius: 16px; padding: .9rem 1rem; margin: .6rem 0; }
++.rec ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
++.badge { display: inline-block; font-size: .78rem; font-weight: 700; border-radius: 999px; padding: .1rem .6rem; background: #fff; border: 1px solid var(--line); margin-right: .3rem; }
++.v-fail .badge { background: var(--red-bg); color: var(--red); border-color: transparent; }
++.v-pass .badge { background: var(--green-bg); color: var(--green); border-color: transparent; }
++
++@media (max-width: 720px) {
++  .role-grid, .grid2 { grid-template-columns: 1fr; }
++  .counts { grid-template-columns: repeat(2, 1fr); }
++  .who span { display: none; }
++  .panel { padding: 1.1rem; border-radius: 20px; }
++  .stepper li { font-size: .8rem; }
++  .subnav { overflow-x: auto; }
++}
++@media (prefers-reduced-motion: reduce) {
++  *, *::before, *::after { animation: none !important; transition: none !important; }
++}
+diff --git a/frontend-app/src/usePanelMotion.js b/frontend-app/src/usePanelMotion.js
+new file mode 100644
+index 0000000..927d9da
+--- /dev/null
++++ b/frontend-app/src/usePanelMotion.js
+@@ -0,0 +1,19 @@
++import gsap from "gsap";
++import { useGSAP } from "@gsap/react";
++import { D, EASE, reduced } from "./motion.js";
++
++gsap.registerPlugin(useGSAP);
++
++// Répond à une action de la personne : le nouveau panneau glisse en place. `key` change => on rejoue.
++export const usePanelMotion = (scope, key, fromX = 24) =>
++  useGSAP(() => {
++    if (reduced()) return;
++    gsap.from(".panel", { x: fromX, opacity: 0, duration: D.base, ease: EASE.out });
++  }, { scope, dependencies: [key] });
++
++// Arrivée des blocs d'une vue, une seule fois.
++export const useEnter = (scope, selector, deps = []) =>
++  useGSAP(() => {
++    if (reduced()) return;
++    gsap.from(selector, { opacity: 0, y: 18, duration: D.base, stagger: 0.07, ease: EASE.out });
++  }, { scope, dependencies: deps });
+diff --git a/src/smart_immigration/accounts/identity.py b/src/smart_immigration/accounts/identity.py
+index 0d9c286..4afe0dc 100644
+--- a/src/smart_immigration/accounts/identity.py
++++ b/src/smart_immigration/accounts/identity.py
+@@ -1,10 +1,10 @@
+ """Agent de vérification d'identité, utilisé À L'INSCRIPTION : le compte candidat n'est créé que si tout est validé.
+ 
+-Contrôles : CIN lisible avec un visage ; images webcam nettes avec un seul visage ; poses demandées au hasard
+-(« live ») ; visage webcam = visage de la CIN ; numéro de CIN saisi retrouvé sur l'image (OCR, si disponible).
++Contrôles : CIN lisible avec un visage ; photo webcam nette avec un seul visage ; visage de face
++(photo de face prise en direct) ; visage webcam = visage de la CIN ; numéro de CIN saisi retrouvé sur l'image (OCR, si disponible).
+ En cas de doute : on demande de recommencer (jamais de passage par le consultant).
+ 
+-LIMITES : une vidéo préparée à l'avance peut encore tromper le défi ; ce n'est pas un test anti-fraude certifié.
++LIMITES : une photo présentée devant la caméra pourrait passer ; ce n'est pas un test anti-fraude certifié.
+ """
+ from __future__ import annotations
+ 
+@@ -33,10 +33,10 @@ class IdentityAgent:
+ 
+     def verify(self, cin_image: bytes, frames: list[bytes], steps: list[str], typed_cin: str) -> IdentityVerdict:
+         reasons: list[str] = []
+-        details: dict = {"liveness": "pose-challenge", "steps": steps}
++        details: dict = {"liveness": "single-live-capture"}
+ 
+-        if len({hashlib.sha256(f).hexdigest() for f in frames}) < len(frames):
+-            return IdentityVerdict("resubmit", ["Des images de la webcam sont identiques : refaites le défi en direct."], details)
++        if hashlib.sha256(cin_image).hexdigest() in {hashlib.sha256(f).hexdigest() for f in frames}:
++            return IdentityVerdict("resubmit", ["La photo en direct ne doit pas être le fichier de la CIN : utilisez la caméra."], details)
+ 
+         cin_obs: FaceObs | None = None
+         try:
+diff --git a/src/smart_immigration/accounts/liveness.py b/src/smart_immigration/accounts/liveness.py
+index 159b7b5..9cd9fdd 100644
+--- a/src/smart_immigration/accounts/liveness.py
++++ b/src/smart_immigration/accounts/liveness.py
+@@ -1,42 +1,23 @@
+-"""Défi « live » : l'écran demande des poses de tête au hasard ; on vérifie la pose sur chaque image.
++"""Contrôle « en direct » : UNE photo prise par la webcam, visage de face, au moment de l'inscription.
+ 
+-`yaw` = décalage horizontal du nez par rapport au milieu des yeux, divisé par l'écart entre les yeux.
+-L'image est capturée NON inversée : la gauche de la personne apparaît à droite de l'image => yaw > 0.
+-Seuils à ajuster avec de vraies captures (constantes ci-dessous).
++Le défi (jeton signé à usage unique, valable 5 min) empêche de rejouer une ancienne requête.
++`yaw` = décalage horizontal du nez par rapport au milieu des yeux, divisé par l'écart entre les yeux (0 = de face).
++LIMITE : ce n'est pas un test anti-fraude certifié (une photo présentée devant la caméra pourrait passer).
+ """
+ from __future__ import annotations
+ 
+-import secrets
++CENTER_MAX = 0.35  # tolérant : il suffit de regarder à peu près la caméra
+ 
+-CENTER_MAX = 0.15
+-TURN_MIN = 0.20
++STEP_TEXT = {"center": "Regardez droit vers la caméra"}
+ 
+-STEP_TEXT = {
+-    "center": "Regardez droit vers la caméra",
+-    "left": "Tournez lentement la tête vers VOTRE gauche",
+-    "right": "Tournez lentement la tête vers VOTRE droite",
+-}
+ 
+-
+-def make_steps(count: int = 4) -> list[str]:
+-    """Suite aléatoire sans répétition consécutive, contenant au moins une pose de chaque type."""
+-    rng = secrets.SystemRandom()
+-    while True:
+-        steps = [rng.choice(list(STEP_TEXT))]
+-        while len(steps) < count:
+-            steps.append(rng.choice([k for k in STEP_TEXT if k != steps[-1]]))
+-        if set(steps) == set(STEP_TEXT):
+-            return steps
++def make_steps() -> list[str]:
++    return ["center"]
+ 
+ 
+ def check_poses(steps: list[str], yaws: list[float]) -> list[str]:
+-    reasons = []
+-    for i, (step, yaw) in enumerate(zip(steps, yaws), start=1):
+-        ok = (
+-            abs(yaw) <= CENTER_MAX if step == "center"
+-            else yaw >= TURN_MIN if step == "left"
+-            else yaw <= -TURN_MIN
+-        )
+-        if not ok:
+-            reasons.append(f"Étape {i} : la pose demandée n'a pas été reconnue ({STEP_TEXT[step].lower()}).")
+-    return reasons
++    return [
++        "Regardez droit vers la caméra, le visage de face."
++        for step, yaw in zip(steps, yaws)
++        if step == "center" and abs(yaw) > CENTER_MAX
++    ]
+diff --git a/tests/accounts/conftest.py b/tests/accounts/conftest.py
+index f73f394..305eb52 100644
+--- a/tests/accounts/conftest.py
++++ b/tests/accounts/conftest.py
+@@ -49,7 +49,7 @@ def client(monkeypatch):
+     app.dependency_overrides.clear()
+ 
+ 
+-POSE = {"center": 0.0, "left": 0.3, "right": -0.3}
++POSE = {"center": 0.0}
+ _counter = {"n": 100000}
+ 
+ 
+diff --git a/tests/accounts/test_accounts.py b/tests/accounts/test_accounts.py
+index ec15421..c3d5e2f 100644
+--- a/tests/accounts/test_accounts.py
++++ b/tests/accounts/test_accounts.py
+@@ -37,22 +37,22 @@ def test_no_account_when_face_does_not_match_cin(client):
+ 
+ 
+ def test_blurry_webcam_frame_is_refused_with_reason(client):
+-    r = signup(client, "c@example.com", problem_at=1)
++    r = signup(client, "c@example.com", problem_at=0)
+     assert r.status_code == 422 and "floue" in " ".join(r.json()["reasons"])
+ 
+ 
+-def test_pose_challenge_is_enforced(client):
+-    r = signup(client, "d@example.com", yaw_override=0.0)  # visage toujours de face : les poses ne sont pas faites
+-    assert r.status_code == 422 and "pose" in " ".join(r.json()["reasons"])
++def test_face_turned_away_is_refused(client):
++    r = signup(client, "d@example.com", yaw_override=0.6)  # visage tourné : pas de face
++    assert r.status_code == 422 and "de face" in " ".join(r.json()["reasons"])
+ 
+ 
+-def test_identical_frames_are_refused(client):
++def test_cin_file_cannot_be_used_as_live_photo(client):
+     ch = client.get("/auth/signup/challenge").json()
+-    n = len(ch["steps"])
+-    files = [("cin_image", ("c.png", img(1, 0.0, seed=99), "image/png"))] + [("frames", ("f.png", img(1, 0.0, seed=5), "image/png"))] * n
++    same = img(1, 0.0, seed=99)
++    files = [("cin_image", ("c.png", same, "image/png")), ("frames", ("f.png", same, "image/png"))]
+     data = {"email": "e@example.com", "password": "motdepasse-solide", "full_name": "E", "cin": "AB123456", "token": ch["token"]}
+     r = client.post("/auth/signup", data=data, files=files)
+-    assert r.status_code == 422 and "identiques" in " ".join(r.json()["reasons"])
++    assert r.status_code == 422 and "utilisez la caméra" in " ".join(r.json()["reasons"])
+ 
+ 
+ def test_challenge_cannot_be_reused_or_forged(client):
+@@ -85,11 +85,9 @@ def test_ocr_matching_tolerates_common_confusions():
+ 
+ 
+ def test_liveness_helpers():
+-    for _ in range(20):
+-        steps = liveness.make_steps()
+-        assert set(steps) == {"center", "left", "right"} and all(a != b for a, b in zip(steps, steps[1:]))
+-    assert liveness.check_poses(["center", "left", "right"], [0.0, 0.3, -0.3]) == []
+-    assert len(liveness.check_poses(["left"], [-0.3])) == 1 and len(liveness.check_poses(["center"], [0.4])) == 1
++    assert liveness.make_steps() == ["center"]
++    assert liveness.check_poses(["center"], [0.1]) == []
++    assert len(liveness.check_poses(["center"], [0.6])) == 1 and len(liveness.check_poses(["center"], [-0.6])) == 1
+ 
+ 
+ def test_signup_validations_and_duplicates(client):
