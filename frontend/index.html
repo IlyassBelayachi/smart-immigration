@@ -445,7 +445,7 @@
     }
 
     const documentLabels = { acceptance: "Lettre d’acceptation", transcript: "Relevé de notes", financial: "Justificatif financier" };
-    const checkLabels = {"identity":"Justificatifs d’identité","medical":"Examen médical","police":"Certificat de police","biometrics":"Biométrie","local_documents":"Pièces demandées par le bureau des visas"};
+    const checkLabels = {"identity":"Justificatifs d’identité","medical":"Examen médical","police":"Certificat de police","biometrics":"Biométrie","local_documents":"Pièces demandées par le bureau des visas","study_explanation":"Lettre d’explication du projet","custodian":"Garde d’un enfant mineur","temporary_stay":"Justificatifs de séjour temporaire"};
     const fieldLabels = {
       ...checkLabels, candidate_name: "Nom", institution: "Établissement", program: "Programme",
       start_date: "Date de début", end_date: "Date de fin", study_period: "Période d’études",
@@ -470,7 +470,7 @@
       select.id = "check-" + name;
       showText(field, "label", title).htmlFor = select.id;
       select.append(new Option("À vérifier", ""), new Option("Terminé", "ready"), new Option("À compléter", "missing"));
-      if (name !== "identity") select.append(new Option("Non applicable après vérification", "not_required"));
+      if (name !== "identity" && name !== "temporary_stay") select.append(new Option("Non applicable après vérification", "not_required"));
       field.append(select);
       checkFields.append(field);
     }

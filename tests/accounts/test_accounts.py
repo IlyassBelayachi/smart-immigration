@@ -172,7 +172,13 @@ def test_passport_is_optional_then_added_in_profile_or_request(client):
 # ---------- Demandes et consultant ----------
 def test_full_flow_candidate_request_consultant_decision(client):
     verified_candidate(client)
-    created = client.post("/requests", json=STUDY)
+    specimen = client.get("/dossier/specimens/acceptance")
+    assert specimen.status_code == 200
+    read = client.post("/dossier/documents/acceptance", content=specimen.content,
+                       headers={"Content-Type": "text/plain"})
+    assert read.status_code == 200
+    extracted = read.json()
+    created = client.post("/requests", json={**STUDY, "profile": {**STUDY["profile"], "extracted_document": extracted}})
     assert created.status_code == 201 and created.json()["recommendation"]["coverage"] == "full"
     rid = created.json()["id"]
     assert client.post(f"/consultant/requests/{rid}/decision", json={"decision": "approved", "reason": "ok ok"}).status_code == 403
@@ -181,7 +187,14 @@ def test_full_flow_candidate_request_consultant_decision(client):
     register_consultant(consultant)
     login(consultant, "cons@example.com")
     assert [r["id"] for r in consultant.get("/consultant/requests").json()] == [rid]
+    assert consultant.get("/consultant/requests").json()[0]["profile"]["extracted_document"] == extracted
     assert consultant.post(f"/consultant/requests/{rid}/decision", json={"decision": "needs_info", "reason": "Relevé manquant"}).json()["status"] == "needs_info"
+    assert consultant.post(f"/requests/{rid}/supplement", json={"message": "Complément interdit"}).status_code == 403
+    supplemented = client.post(f"/requests/{rid}/supplement", json={"message": "Le relevé sera fourni."})
+    assert supplemented.status_code == 200
+    assert supplemented.json()["status"] == "awaiting_review"
+    assert consultant.get("/consultant/requests").json()[0]["profile"]["supplements"] == ["Le relevé sera fourni."]
+    assert client.post(f"/requests/{rid}/supplement", json={"message": "Nouvel envoi"}).status_code == 409
     assert consultant.post(f"/consultant/requests/{rid}/decision", json={"decision": "approved", "reason": "Complet"}).json()["status"] == "approved"
     assert consultant.post(f"/consultant/requests/{rid}/decision", json={"decision": "rejected", "reason": "tard"}).status_code == 409
     mine = client.get("/requests").json()[0]
@@ -192,6 +205,45 @@ def test_uncovered_motive_is_flagged_for_human(client):
     verified_candidate(client)
     r = client.post("/requests", json={"motive": "family", "destination": "FR", "profile": {}}).json()
     assert r["recommendation"]["coverage"] == "not_covered"
+
+
+def test_undecided_request_and_chatbot_share_destination_ranking(client):
+    verified_candidate(client)
+    preferences = {"region": "america", "language": "fr", "adapt": "no", "contact": "CA"}
+    suggestions = client.post("/requests/orientation", json=preferences)
+    assert suggestions.status_code == 200
+    assert suggestions.json()[0]["code"] == "CA"
+    response = client.post("/requests", json={
+        "motive": "work", "destination": "ZZ",
+        "profile": {"occupation": "Développeur", "orientation": preferences},
+    })
+    assert response.status_code == 201
+    report = response.json()["recommendation"]
+    assert report["suggestions"] == suggestions.json()
+    assert report["provided_fields"]["Métier"] == "Développeur"
+    assert "Expérience" in report["missing_fields"]
+    assert report["results"] == []
+
+
+def test_interview_requires_all_answers_and_confirmation(client):
+    verified_candidate(client)
+    path = "/requests/orientation/interview"
+    answers = [
+        "Je cherche du travail l’an prochain.",
+        "Je suis développeur depuis cinq ans.",
+        "Je parle français.",
+        "Je prévois 80 000 MAD.",
+        "Je pars seul et je chercherai un logement.",
+        "Je préfère l’Europe, sauf la France.",
+    ]
+    partial = client.post(path, json={"answers": answers[:3], "confirmed": True}).json()
+    assert partial["accepted"] == 3 and "suggestions" not in partial
+    recap = client.post(path, json={"answers": answers}).json()
+    assert recap["ready"] and "suggestions" not in recap
+    result = client.post(path, json={"answers": answers, "confirmed": True}).json()
+    assert result["motive"] == "work"
+    assert result["suggestions"]
+    assert "FR" not in [entry["code"] for entry in result["suggestions"]]
 
 
 def test_candidate_cannot_see_other_candidates_requests(client):

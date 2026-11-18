@@ -1,20 +1,22 @@
 # Regles declaratives - Canada, permis d'etudes (demande depuis l'exterieur du Canada).
-# Chaque regle cite sa source IRCC et la date "Page details" lue le 2026-11-10.
+# Chaque contrôle indique sa source IRCC et sa date de consultation.
 # Les montants/dates DOIVENT etre reverifies sur la page officielle avant la demo finale (les regles changent).
 pathway: study_permit_CA
-version: "2026-11-11"
+version: "2026-11-18"
 rules:
   - id: CA-SP-001
+    source_reviewed: "2026-11-18"
     type: required_flag
     title: Lettre d'acceptation d'un etablissement designe (DLI)
     field: has_letter_of_acceptance
     meets: "Une lettre d'acceptation d'un DLI est declaree."
-    fails: "Aucune lettre d'acceptation d'un DLI n'est declaree ; elle fait partie des documents a fournir."
+    fails: "Aucune lettre d’acceptation d’un DLI n’est déclarée. Fournissez-la ou faites vérifier si l’exception IRCC s’applique."
     source_urls:
       - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/apply.html
       - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/eligibility.html
 
   - id: CA-SP-002
+    source_reviewed: "2026-11-18"
     type: attestation_letter
     title: Lettre d'attestation provinciale/territoriale (PAL/TAL) ou CAQ au Quebec
     # Exemption verifiee : maitrise/doctorat dans un DLI public (programmes commencant a partir du 2026-01-01).
@@ -25,6 +27,7 @@ rules:
       - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents/provincial-attestation-letter.html
 
   - id: CA-SP-003
+    source_reviewed: "2026-11-18"
     type: funds_threshold
     title: Fonds suffisants pour la premiere annee (frais de vie + scolarite + transport)
     # required = living_expenses(family_size, date) + tuition + transport ; hors Quebec.
@@ -86,3 +89,28 @@ document_checks:
       - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
     source_updated: "2026-10-06"
     source_reviewed: "2026-11-11"
+
+  - id: CA-SP-009
+    field: study_explanation
+    title: Lettre d’explication du projet d’études
+    conditional: true
+    instruction: "IRCC recommande une lettre présentant le projet d’études et la compréhension des responsabilités de l’étudiant."
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    source_reviewed: "2026-11-18"
+  - id: CA-SP-010
+    field: custodian
+    title: Garde d’un enfant mineur
+    conditional: true
+    instruction: "Vérifiez les justificatifs de garde si un enfant de moins de 17 ans part sans parent ni tuteur légal."
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/get-documents.html
+    source_reviewed: "2026-11-18"
+  - id: CA-SP-011
+    field: temporary_stay
+    title: Justificatifs de séjour temporaire
+    conditional: false
+    instruction: "Préparez les éléments permettant à l’agent d’évaluer le départ à l’expiration du permis."
+    source_urls:
+      - https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/eligibility.html
+    source_reviewed: "2026-11-18"

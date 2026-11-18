@@ -15,7 +15,10 @@ from ..schemas import ApplicantProfile, AssessmentReport, RuleResult, Verdict
 RULES_PATH = Path(__file__).resolve().parents[3] / "rules" / "study_permit_ca.yaml"
 FEDERAL_PROVINCES = frozenset({"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "SK", "YT"})
 DocumentCheck = Literal["ready", "missing", "not_required"]
-DocumentCheckName = Literal["identity", "medical", "police", "biometrics", "local_documents"]
+DocumentCheckName = Literal[
+    "identity", "medical", "police", "biometrics", "local_documents",
+    "study_explanation", "custodian", "temporary_stay",
+]
 
 
 def load_ruleset(path: Path | None = None) -> dict[str, Any]:

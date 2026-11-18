@@ -6,6 +6,8 @@ from PIL import Image
 
 from smart_immigration.api import app
 from smart_immigration.dossier import portal
+from smart_immigration.dossier.agents import check_dossier, read_document
+from smart_immigration.dossier.routes import DossierRequest
 
 
 def _register(client, email, role, invitation=""):
@@ -115,3 +117,40 @@ def test_general_intake_persists_files_and_limits_download_access(tmp_path, monk
     candidate_record = candidate.get("/portal/cases").json()["cases"][0]
     assert candidate_record["events"][-1]["message"] == "Pièces examinées."
     assert reviewer.post(action, json={"action": "approve_transmission", "message": "Doublon."}).status_code == 409
+
+
+def test_study_demo_from_question_to_consultant_decision(tmp_path, monkeypatch):
+    monkeypatch.setattr(portal, "DB_PATH", tmp_path / "demo.sqlite3")
+    monkeypatch.setenv("IMMIGRATION_CONSULTANT_INVITE", "test-invitation")
+    candidate, consultant = TestClient(app), TestClient(app)
+    _register(candidate, "lina@example.test", "candidate")
+    _register(consultant, "consultant@example.test", "consultant", "test-invitation")
+
+    answer = candidate.post("/ask", json={"question": "Is the biometrics fee required when I submit?"})
+    assert answer.status_code == 200 and answer.json()["evidence"]
+    pieces = []
+    for kind in ("acceptance", "transcript", "financial"):
+        original = candidate.get(f"/dossier/specimens/{kind}")
+        read = read_document(kind, original.content, kind, "text/plain")
+        assert read.status == "needs_human"
+        pieces.append(read.data["document"])
+
+    payload = {
+        "profile": {"has_letter_of_acceptance": True, "level_of_study": "bachelor",
+                    "destination_province": "ON", "application_date": "2026-11-18", "pal_provided": True,
+                    "family_size": 1, "tuition_first_year_cad": 12000, "transport_cost_cad": 1500},
+        "documents": pieces,
+    }
+    assert check_dossier("before", DossierRequest.model_validate(payload)).status == "needs_human"
+    for piece in pieces:
+        for field in piece["fields"]:
+            field["reviewed_by_human"] = True
+    result = check_dossier("after", DossierRequest.model_validate(payload))
+    assert result.status == "ok"
+    assert result.data["funds_from_documents_cad"] == 45000
+    assert len(result.data["checklist"]["items"]) == 11
+    assert candidate.post("/portal/cases", json=payload).status_code == 201
+    case = consultant.get("/portal/cases").json()["cases"][0]
+    action = f"/portal/cases/{case['id']}/actions"
+    assert consultant.post(action, json={"action": "approve_transmission", "message": "Contrôles revus."}).status_code == 200
+    assert candidate.get("/portal/cases").json()["cases"][0]["status"] == "ready_to_send"

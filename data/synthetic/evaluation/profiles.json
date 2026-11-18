@@ -1,0 +1,1082 @@
+[
+  {
+    "id": "profil-01",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 1,
+      "funds_available_cad": 28894,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "DOES_NOT_MEET",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-02",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 1,
+      "funds_available_cad": 28895,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "DOES_NOT_MEET",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-03",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 1,
+      "funds_available_cad": 28896,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": null,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "UNKNOWN",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-04",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 1,
+      "funds_available_cad": null,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-05",
+    "profile": {
+      "destination_province": "QC",
+      "application_date": "2026-08-31",
+      "family_size": 1,
+      "funds_available_cad": 28895,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": true
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-06",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 1,
+      "funds_available_cad": 29447,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "DOES_NOT_MEET",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-07",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 1,
+      "funds_available_cad": 29448,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "DOES_NOT_MEET",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-08",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 1,
+      "funds_available_cad": 29449,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": null,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "UNKNOWN",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-09",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 1,
+      "funds_available_cad": null,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-10",
+    "profile": {
+      "destination_province": "QC",
+      "application_date": "2026-09-01",
+      "family_size": 1,
+      "funds_available_cad": 29448,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": true
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-11",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 2,
+      "funds_available_cad": 35191,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "DOES_NOT_MEET",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-12",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 2,
+      "funds_available_cad": 35192,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "DOES_NOT_MEET",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-13",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 2,
+      "funds_available_cad": 35193,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": null,
+      "caq_provided": false
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "UNKNOWN",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-14",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 2,
+      "funds_available_cad": null,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-15",
+    "profile": {
+      "destination_province": "QC",
+      "application_date": "2026-09-01",
+      "family_size": 2,
+      "funds_available_cad": 35192,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": true
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-16",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 7,
+      "funds_available_cad": 68053,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "DOES_NOT_MEET",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-17",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 7,
+      "funds_available_cad": 68054,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": false
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "DOES_NOT_MEET",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-18",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 7,
+      "funds_available_cad": 68055,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": null,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "UNKNOWN",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-19",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 7,
+      "funds_available_cad": null,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-20",
+    "profile": {
+      "destination_province": "QC",
+      "application_date": "2026-09-01",
+      "family_size": 7,
+      "funds_available_cad": 68054,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": true,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": true
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "MEETS",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-21",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 8,
+      "funds_available_cad": 74371,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "DOES_NOT_MEET",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-22",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 8,
+      "funds_available_cad": 74372,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "DOES_NOT_MEET",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-23",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 8,
+      "funds_available_cad": 74373,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": null,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "UNKNOWN",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-24",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-09-01",
+      "family_size": 8,
+      "funds_available_cad": null,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-25",
+    "profile": {
+      "destination_province": "QC",
+      "application_date": "2026-09-01",
+      "family_size": 8,
+      "funds_available_cad": 74372,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": false,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": true
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "DOES_NOT_MEET",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-26",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 8,
+      "funds_available_cad": 72758,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "DOES_NOT_MEET",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-27",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 8,
+      "funds_available_cad": 72759,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "missing",
+      "medical": "not_required",
+      "biometrics": "ready",
+      "local_documents": "missing",
+      "study_explanation": "not_required",
+      "temporary_stay": "ready"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "DOES_NOT_MEET",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "DOES_NOT_MEET",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "UNKNOWN",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "DOES_NOT_MEET",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "UNKNOWN",
+      "CA-SP-011": "MEETS"
+    }
+  },
+  {
+    "id": "profil-28",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 8,
+      "funds_available_cad": 72760,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": null,
+      "caq_provided": false
+    },
+    "checks": {
+      "identity": "not_required",
+      "police": "ready",
+      "biometrics": "missing",
+      "local_documents": "not_required",
+      "custodian": "ready",
+      "temporary_stay": "missing"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "UNKNOWN",
+      "CA-SP-003": "MEETS",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "UNKNOWN",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "DOES_NOT_MEET",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "UNKNOWN",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "DOES_NOT_MEET"
+    }
+  },
+  {
+    "id": "profil-29",
+    "profile": {
+      "destination_province": "ON",
+      "application_date": "2026-08-31",
+      "family_size": 8,
+      "funds_available_cad": null,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": true,
+      "caq_provided": false
+    },
+    "checks": {
+      "medical": "ready",
+      "police": "missing",
+      "biometrics": "not_required",
+      "study_explanation": "ready",
+      "custodian": "missing",
+      "temporary_stay": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "UNKNOWN",
+      "CA-SP-005": "MEETS",
+      "CA-SP-006": "DOES_NOT_MEET",
+      "CA-SP-007": "MEETS",
+      "CA-SP-008": "UNKNOWN",
+      "CA-SP-009": "MEETS",
+      "CA-SP-010": "DOES_NOT_MEET",
+      "CA-SP-011": "UNKNOWN"
+    }
+  },
+  {
+    "id": "profil-30",
+    "profile": {
+      "destination_province": "QC",
+      "application_date": "2026-08-31",
+      "family_size": 8,
+      "funds_available_cad": 72759,
+      "tuition_first_year_cad": 5000,
+      "transport_cost_cad": 1000,
+      "has_letter_of_acceptance": null,
+      "level_of_study": "bachelor",
+      "pal_provided": false,
+      "caq_provided": true
+    },
+    "checks": {
+      "identity": "ready",
+      "medical": "missing",
+      "police": "not_required",
+      "local_documents": "ready",
+      "study_explanation": "missing",
+      "custodian": "not_required"
+    },
+    "expected": {
+      "CA-SP-001": "UNKNOWN",
+      "CA-SP-002": "MEETS",
+      "CA-SP-003": "UNKNOWN",
+      "CA-SP-004": "MEETS",
+      "CA-SP-005": "DOES_NOT_MEET",
+      "CA-SP-006": "MEETS",
+      "CA-SP-007": "UNKNOWN",
+      "CA-SP-008": "MEETS",
+      "CA-SP-009": "DOES_NOT_MEET",
+      "CA-SP-010": "MEETS",
+      "CA-SP-011": "UNKNOWN"
+    }
+  }
+]

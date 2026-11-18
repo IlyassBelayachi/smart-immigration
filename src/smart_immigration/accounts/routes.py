@@ -16,7 +16,8 @@ from .common import (DUMMY_HASH, audit, clean_cin, clean_passport, current_user,
                      public, require, start_session)
 from .db import get_session
 from .models import Decision, ImmigrationRequest, User
-from .recommend import recommend
+from .orientation import interview
+from .recommend import COMMON, BY_MOTIVE, recommend, suggest
 from .recovery import router as recovery_router
 from .signup import get_identity_agent, router as signup_router  # noqa: F401  (get_identity_agent réexporté pour les tests)
 
@@ -118,11 +119,54 @@ def update_profile(body: ProfileBody, user: User = Depends(current_user), db: Se
 
 
 # ---------- Demandes d'immigration (candidat) ----------
+@router.get("/requests/form-options")
+def request_form_options(user: User = Depends(require("candidate"))):
+    return {"common": COMMON, "by_motive": BY_MOTIVE}
+
+
+class OrientationBody(BaseModel):
+    region: str = Field(default="", max_length=20)
+    language: str = Field(default="", max_length=10)
+    contact: str = Field(default="", max_length=10)
+    adapt: str = Field(default="", max_length=5)
+
+
+@router.post("/requests/orientation")
+def orientation(body: OrientationBody, user: User = Depends(require("candidate"))):
+    return suggest(body.model_dump())
+
+
+class InterviewBody(BaseModel):
+    answers: list[str] = Field(default_factory=list, max_length=6)
+    confirmed: bool = False
+
+    @field_validator("answers")
+    @classmethod
+    def limit_answers(cls, answers):
+        if any(len(answer) > 1500 for answer in answers):
+            raise ValueError("Une réponse doit faire au maximum 1 500 caractères.")
+        return answers
+
+
+@router.post("/requests/orientation/interview")
+def orientation_interview(body: InterviewBody, user: User = Depends(require("candidate"))):
+    return interview(body.answers, body.confirmed)
+
+
 class RequestBody(BaseModel):
     motive: Literal["study", "work", "family", "skilled_work", "entrepreneur", "visit", "protection", "other"]
     destination: str = Field(pattern=r"^[A-Z]{2}$")
     profile: dict = Field(default_factory=dict)
     passport: str | None = Field(default=None, max_length=20)  # facultatif, peut être ajouté ici
+
+    @field_validator("profile")
+    @classmethod
+    def check_extraction(cls, profile):
+        from ..dossier.documents import Specimen
+
+        if "extracted_document" in profile:
+            profile["extracted_document"] = Specimen.model_validate(profile["extracted_document"]).model_dump(mode="json")
+        return profile
 
     @field_validator("passport")
     @classmethod
@@ -147,8 +191,9 @@ def create_request(body: RequestBody, user: User = Depends(require("candidate"))
         rec = recommend(body.motive, body.destination, body.profile)
     except ValueError as error:
         raise HTTPException(422, f"Profil invalide : {error}") from error
+    profile = {key: value for key, value in body.profile.items() if key != "supplements"}
     req = ImmigrationRequest(user_id=user.id, motive=body.motive, destination=body.destination,
-                             profile=body.profile, recommendation=rec)
+                             profile=profile, recommendation=rec)
     db.add(req)
     db.flush()
     audit(db, user.id, "request_created", f"{req.id}")
@@ -159,6 +204,35 @@ def create_request(body: RequestBody, user: User = Depends(require("candidate"))
 def my_requests(user: User = Depends(require("candidate")), db: Session = Depends(get_session)):
     rows = db.scalars(select(ImmigrationRequest).where(ImmigrationRequest.user_id == user.id).order_by(ImmigrationRequest.id.desc()))
     return [serialize(r) for r in rows]
+
+
+class SupplementBody(BaseModel):
+    message: str = Field(min_length=3, max_length=2500)
+
+
+@router.post("/requests/{request_id}/supplement")
+def supplement_request(request_id: int, body: SupplementBody, user: User = Depends(require("candidate")),
+                       db: Session = Depends(get_session)):
+    message = body.message.strip()
+    if len(message) < 3:
+        raise HTTPException(422, "Précisez les informations complémentaires.")
+    req = db.scalar(select(ImmigrationRequest).where(
+        ImmigrationRequest.id == request_id, ImmigrationRequest.user_id == user.id
+    ).with_for_update())
+    if req is None:
+        raise HTTPException(404, "Demande introuvable.")
+    if req.status != "needs_info":
+        raise HTTPException(409, "Cette demande n’attend pas de complément.")
+    previous = req.profile.get("supplements")
+    profile = {**req.profile, "supplements": [*(previous if isinstance(previous, list) else []), message]}
+    updated = db.query(ImmigrationRequest).filter_by(
+        id=req.id, user_id=user.id, status="needs_info"
+    ).update({"profile": profile, "status": "awaiting_review"})
+    if not updated:
+        raise HTTPException(409, "Cette demande a déjà changé d’état.")
+    audit(db, user.id, "request_supplemented", str(req.id))
+    db.flush()
+    return serialize(req)
 
 
 # ---------- Consultant : examine les demandes et décide ----------

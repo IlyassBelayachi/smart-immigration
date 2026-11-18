@@ -21,7 +21,7 @@ app.include_router(accounts_router)
 
 @app.get("/", include_in_schema=False)
 def demo_home() -> RedirectResponse:
-    return RedirectResponse(url="/demo/")
+    return RedirectResponse(url="/app/" if _REACT_DIST.exists() else "/demo/")
 
 
 app.mount(
