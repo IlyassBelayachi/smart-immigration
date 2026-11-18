@@ -15,4 +15,4 @@ export const STATUS = {
   rejected: "Refusée",
 };
 export const VERDICT = { MEETS: "Critère rempli", DOES_NOT_MEET: "Critère non rempli", UNKNOWN: "Information manquante" };
-export const COUNTRIES = { CA: "Canada", FR: "France", DE: "Allemagne", ES: "Espagne", IT: "Italie", BE: "Belgique", NL: "Pays-Bas", CH: "Suisse", TR: "Turquie", IL: "Israël" };
+export const COUNTRIES = { CA: "Canada", FR: "France", DE: "Allemagne", ES: "Espagne", IT: "Italie", BE: "Belgique", NL: "Pays-Bas", CH: "Suisse", TR: "Turquie", IL: "Israël", ZZ: "Destination à définir" };

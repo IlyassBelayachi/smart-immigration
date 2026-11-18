@@ -52,6 +52,27 @@ export default function Consultant() {
             <article key={r.id} className="req">
               <h3>Demande {r.id} · {MOTIVES[r.motive]} · {COUNTRIES[r.destination] || r.destination} <span className={"status s-" + r.status}>{STATUS[r.status]}</span></h3>
               <StatusTrack status={r.status} />
+              {!r.recommendation?.provided_fields && typeof r.profile?.project_description === "string" && r.profile.project_description && <p>{r.profile.project_description}</p>}
+              {Array.isArray(r.profile?.extracted_document?.fields) && (
+                <details>
+                  <summary>Champs relevés dans le spécimen</summary>
+                  <ul>{r.profile.extracted_document.fields.map((field, index) => field && (
+                    <li key={index}>{String(field.field_name)} · {String(field.value ?? "À renseigner")}
+                      {field.page ? ` · page ${field.page}` : ""}</li>
+                  ))}</ul>
+                </details>
+              )}
+              {r.profile?.supplements?.map((message, i) => <p key={i}>Complément du candidat · {message}</p>)}
+              {r.profile?.orientation_interview && (
+                <details>
+                  <summary>Entretien d’orientation</summary>
+                  <dl className="facts-list">
+                    {Object.entries(r.profile.orientation_interview).filter(([, answer]) => typeof answer === "string").map(([topic, answer]) => (
+                      <div key={topic}><dt>{topic.charAt(0).toUpperCase() + topic.slice(1)}</dt><dd>{answer}</dd></div>
+                    ))}
+                  </dl>
+                </details>
+              )}
               <Recommendation rec={r.recommendation} />
               {r.decisions.map((d, i) => <p key={i} className="decision">{STATUS[d.decision]}. {d.reason}</p>)}
               {!closed && (

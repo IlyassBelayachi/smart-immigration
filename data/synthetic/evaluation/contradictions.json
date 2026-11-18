@@ -1,0 +1,407 @@
+[
+  {
+    "files": [
+      "evaluation/00-acceptance.txt",
+      "evaluation/01-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/00-acceptance.txt",
+      "evaluation/04-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "candidate_name"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/00-acceptance.txt",
+      "evaluation/04-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "candidate_name"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/02-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": 30001
+    },
+    "unconfirmed": [],
+    "expected": [
+      "funds_available_cad"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/02-financial.txt",
+      "evaluation/05-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "amount"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/02-financial.txt",
+      "evaluation/05-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "currency"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/03-acceptance.txt",
+      "evaluation/04-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/03-acceptance.txt",
+      "evaluation/07-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "candidate_name"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/03-acceptance.txt",
+      "evaluation/07-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "candidate_name"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/05-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": 30501
+    },
+    "unconfirmed": [],
+    "expected": [
+      "funds_available_cad"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/05-financial.txt",
+      "evaluation/08-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "amount"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/05-financial.txt",
+      "evaluation/08-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "currency"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/06-acceptance.txt",
+      "evaluation/07-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/06-acceptance.txt",
+      "evaluation/10-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "candidate_name"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/06-acceptance.txt",
+      "evaluation/10-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "candidate_name"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/08-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": 31001
+    },
+    "unconfirmed": [],
+    "expected": [
+      "funds_available_cad"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/08-financial.txt",
+      "evaluation/11-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "amount"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/08-financial.txt",
+      "evaluation/11-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "currency"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/09-acceptance.txt",
+      "evaluation/10-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/09-acceptance.txt",
+      "evaluation/13-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "candidate_name"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/09-acceptance.txt",
+      "evaluation/13-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "candidate_name"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/11-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": 31501
+    },
+    "unconfirmed": [],
+    "expected": [
+      "funds_available_cad"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/11-financial.txt",
+      "evaluation/14-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "amount"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/11-financial.txt",
+      "evaluation/14-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "currency"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/12-acceptance.txt",
+      "evaluation/13-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/12-acceptance.txt",
+      "evaluation/16-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "candidate_name"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/12-acceptance.txt",
+      "evaluation/16-transcript.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "candidate_name"
+      ]
+    ],
+    "expected": []
+  },
+  {
+    "files": [
+      "evaluation/14-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": 32001
+    },
+    "unconfirmed": [],
+    "expected": [
+      "funds_available_cad"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/14-financial.txt",
+      "evaluation/17-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [],
+    "expected": [
+      "amount"
+    ]
+  },
+  {
+    "files": [
+      "evaluation/14-financial.txt",
+      "evaluation/17-financial.txt"
+    ],
+    "profile": {
+      "funds_available_cad": null
+    },
+    "unconfirmed": [
+      [
+        1,
+        "currency"
+      ]
+    ],
+    "expected": []
+  }
+]

@@ -132,10 +132,12 @@ def test_reads_all_fields_on_clean_raster_specimens(document_type):
 @pytest.mark.parametrize("field,rule_id", [
     ("identity", "CA-SP-004"), ("medical", "CA-SP-005"), ("police", "CA-SP-006"),
     ("biometrics", "CA-SP-007"), ("local_documents", "CA-SP-008"),
+    ("study_explanation", "CA-SP-009"), ("custodian", "CA-SP-010"),
+    ("temporary_stay", "CA-SP-011"),
 ])
 def test_document_check_tracks_declared_status(field, rule_id):
     for status, expected in [(None, "to_confirm"), ("ready", "declared"), ("missing", "to_provide"),
-                             ("not_required", "to_confirm" if field == "identity" else "declared")]:
+                             ("not_required", "to_confirm" if field in {"identity", "temporary_stay"} else "declared")]:
         checks = {field: status} if status else {}
         response = client.post("/dossier/report", json={"profile": {}, "document_checks": checks})
         assert response.status_code == 200

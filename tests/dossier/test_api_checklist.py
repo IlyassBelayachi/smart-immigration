@@ -14,11 +14,12 @@ def test_demo_page_is_served():
     assert "Smart Immigration" in response.text
 
 
-def test_root_redirects_to_demo():
+def test_root_redirects_to_available_interface():
     response = client.get("/", follow_redirects=False)
 
     assert response.status_code == 307
-    assert response.headers["location"] == "/demo/"
+    has_react = any(getattr(route, "path", None) == "/app" for route in app.routes)
+    assert response.headers["location"] == ("/app/" if has_react else "/demo/")
 
 
 def test_demo_flow_returns_sourced_answer_verdicts_and_checklist():

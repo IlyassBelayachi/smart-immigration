@@ -18,6 +18,7 @@ async function call(path, options = {}) {
 
 function messageFrom(status, data) {
   const d = data && data.detail;
+  if (status === 404 && d === "Not Found") return "La route demandée est indisponible. Vérifiez que le serveur correspond à cette version de l’application.";
   if (typeof d === "string") return d;
   if (Array.isArray(d) && d.length) {
     // Erreurs de validation : on affiche le premier message lisible.
@@ -46,6 +47,13 @@ export const api = {
   forgotPassword: (email) => call("/auth/forgot-password", { method: "POST", ...json({ email }) }),
   resetPassword: (token, password) => call("/auth/reset-password", { method: "POST", ...json({ token, password }) }),
   myRequests: () => call("/requests"),
+  formOptions: () => call("/requests/form-options"),
+  orientation: (answers) => call("/requests/orientation", { method: "POST", ...json(answers) }),
+  interview: (answers, confirmed = false) => call("/requests/orientation/interview", { method: "POST", ...json({ answers, confirmed }) }),
+  readSpecimen: (kind, file) => call(`/dossier/documents/${kind}`, {
+    method: "POST", headers: { "Content-Type": file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "text/plain" }, body: file
+  }),
+  supplement: (id, message) => call(`/requests/${id}/supplement`, { method: "POST", ...json({ message }) }),
   createRequest: (body) => call("/requests", { method: "POST", ...json(body) }),
   consultantRequests: () => call("/consultant/requests"),
   decide: (id, body) => call(`/consultant/requests/${id}/decision`, { method: "POST", ...json(body) }),

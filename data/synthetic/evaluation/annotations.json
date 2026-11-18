@@ -1,0 +1,403 @@
+[
+  {
+    "file": "acceptance.pdf",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Lina Exemple",
+      "institution": "Institut fictif des Rives",
+      "program": "Informatique appliquée",
+      "start_date": "2027-09-07",
+      "end_date": "2028-06-30"
+    }
+  },
+  {
+    "file": "transcript.pdf",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Lina Exemple",
+      "institution": "Collège fictif des Jardins",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "financial.pdf",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Lina Exemple",
+      "amount": "45000.00",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/00-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 00",
+      "institution": "École fictive 00",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/01-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 00",
+      "institution": "École fictive 01",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/02-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 00",
+      "amount": "30000",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/03-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 01",
+      "institution": "École fictive 03",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/04-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 01",
+      "institution": "École fictive 04",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/05-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 01",
+      "amount": "30500",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/06-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 02",
+      "institution": "École fictive 06",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/07-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 02",
+      "institution": "École fictive 07",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/08-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 02",
+      "amount": "31000",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/09-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 03",
+      "institution": "École fictive 09",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/10-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 03",
+      "institution": "École fictive 10",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/11-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 03",
+      "amount": "31500",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/12-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 04",
+      "institution": "École fictive 12",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/13-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 04",
+      "institution": "École fictive 13",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/14-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 04",
+      "amount": "32000",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/15-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 05",
+      "institution": "École fictive 15",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/16-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 05",
+      "institution": "École fictive 16",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/17-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 05",
+      "amount": "32500",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/18-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 06",
+      "institution": "École fictive 18",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/19-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 06",
+      "institution": "École fictive 19",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/20-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 06",
+      "amount": "33000",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/21-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 07",
+      "institution": "École fictive 21",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/22-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 07",
+      "institution": "École fictive 22",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/23-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 07",
+      "amount": "33500",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/24-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 08",
+      "institution": "École fictive 24",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/25-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 08",
+      "institution": "École fictive 25",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/26-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 08",
+      "amount": "34000",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/27-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 09",
+      "institution": "École fictive 27",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": "2028-06-25"
+    }
+  },
+  {
+    "file": "evaluation/28-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 09",
+      "institution": "École fictive 28",
+      "study_period": "2024–2026"
+    }
+  },
+  {
+    "file": "evaluation/29-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 09",
+      "amount": "34500",
+      "currency": "CAD",
+      "issue_date": "2026-11-10"
+    }
+  },
+  {
+    "file": "evaluation/30-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 10",
+      "institution": "École fictive 30",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": null
+    }
+  },
+  {
+    "file": "evaluation/31-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 10",
+      "institution": "École fictive 31",
+      "study_period": null
+    }
+  },
+  {
+    "file": "evaluation/32-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 10",
+      "amount": "35000",
+      "currency": "CAD",
+      "issue_date": null
+    }
+  },
+  {
+    "file": "evaluation/33-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 11",
+      "institution": "École fictive 33",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": null
+    }
+  },
+  {
+    "file": "evaluation/34-transcript.txt",
+    "type": "transcript",
+    "expected": {
+      "candidate_name": "Élève Fictif 11",
+      "institution": "École fictive 34",
+      "study_period": null
+    }
+  },
+  {
+    "file": "evaluation/35-financial.txt",
+    "type": "financial",
+    "expected": {
+      "account_holder": "Garant Fictif 11",
+      "amount": "35500",
+      "currency": "CAD",
+      "issue_date": null
+    }
+  },
+  {
+    "file": "evaluation/36-acceptance.txt",
+    "type": "acceptance",
+    "expected": {
+      "candidate_name": "Élève Fictif 12",
+      "institution": "École fictive 36",
+      "program": "Génie civil",
+      "start_date": "2027-09-01",
+      "end_date": null
+    }
+  }
+]

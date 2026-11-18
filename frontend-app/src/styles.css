@@ -164,3 +164,23 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--r
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+.orientation-chat { display: grid; gap: .5rem; margin-bottom: 1rem; }
+.chat-question, .chat-answer { padding: .75rem 1rem; border-radius: 1rem; width: fit-content; max-width: 85%; }
+.chat-question { background: #fff1e6; color: #4b2631; }
+.chat-answer { margin-left: auto; background: #fae3ee; color: #4b2631; }
+
+.application-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.5rem;
+  padding-inline-start: 1.6rem;
+  margin-block: 1.25rem;
+}
+.application-steps li[aria-current="step"] {
+  color: var(--accent, #a21d50);
+  font-weight: 700;
+}
+.orientation-chat .chat-answer {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
