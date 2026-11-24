@@ -9,9 +9,19 @@ def index():
     return LexicalIndex(load_chunks())
 
 
+OFFICIAL = {
+    "CA": "https://www.canada.ca/",
+    "US": ("https://travel.state.gov/", "https://www.ice.gov/"),
+    "SCHENGEN": "https://home-affairs.ec.europa.eu/",
+    "FR": ("https://france-visas.gouv.fr/", "https://www.campusfrance.org/"),
+}
+
+
 def test_seed_corpus_has_provenance():
-    for c in load_chunks():
-        assert c.url.startswith("https://www.canada.ca/")
+    chunks = load_chunks()
+    assert {c.country for c in chunks} == set(OFFICIAL)
+    for c in chunks:
+        assert c.url.startswith(OFFICIAL[c.country])
         assert c.retrieved_at is not None and c.content_hash
 
 

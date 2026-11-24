@@ -1,0 +1,18 @@
+# Etats-Unis, visa etudiant (F/M). Pages ouvertes et lues le 2026-11-20.
+# Ces pages n'affichent pas de date de mise a jour : page_modified reste vide.
+country: US
+pathway: student_visa
+language: en
+sources:
+  - source_id: us-ds-student-visa
+    title: "Student Visa (U.S. Department of State)"
+    url: https://travel.state.gov/content/travel/en/us-visas/study/student-visa.html
+    verified: true
+  - source_id: us-ds-public-schools
+    title: "Foreign Students in Public Schools (U.S. Department of State)"
+    url: https://travel.state.gov/content/travel/en/us-visas/study/student-visa/foreign-students-in-public-schools.html
+    verified: true
+  - source_id: us-ice-i901-faq
+    title: "I-901 SEVIS Fee Frequently Asked Questions (ICE)"
+    url: https://www.ice.gov/sevis/i901/faq
+    verified: true

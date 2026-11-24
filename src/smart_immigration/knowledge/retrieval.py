@@ -11,6 +11,7 @@ import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 from rank_bm25 import BM25Okapi
 
 from ..schemas import KnowledgeChunk
@@ -46,27 +47,42 @@ def load_chunks(path: Path | None = None) -> list[KnowledgeChunk]:
 @dataclass
 class Hit:
     chunk: KnowledgeChunk
-    score: float
+    score: float  # score BM25 (mots-cles)
     coverage: float  # part des termes (hors mots vides) de la question presents dans le passage
+    cosine: float | None = None  # ressemblance de sens (index vectoriel), si actif
+
+
+def allowed_mask(chunks: list[KnowledgeChunk], country: str | None, pathway: str | None) -> list[bool]:
+    """Vrai pour les passages du pays / parcours demandes (tous si aucun filtre)."""
+    c = country.strip().upper() if country else None
+    p = pathway.strip().lower() if pathway else None
+    return [(c is None or ch.country.upper() == c) and (p is None or ch.pathway.lower() == p) for ch in chunks]
 
 
 class LexicalIndex:
+    method = "bm25"
+
     def __init__(self, chunks: list[KnowledgeChunk]):
         if not chunks:
             raise ValueError("corpus vide")
         self.chunks = chunks
         self._tokens = [content_tokens(f"{c.title} {c.section or ''} {c.text}") for c in chunks]
+        self._sets = [set(t) for t in self._tokens]
         self._bm25 = BM25Okapi(self._tokens)
 
-    def search(self, query: str, k: int = 3) -> list[Hit]:
+    def scores(self, query: str) -> tuple[np.ndarray, list[float]]:
+        """Score BM25 et couverture de chaque passage pour la question."""
         q = content_tokens(query)
         if not q:
+            return np.zeros(len(self.chunks)), [0.0] * len(self.chunks)
+        qs = set(q)
+        coverage = [sum(1 for t in qs if t in present) / len(qs) for present in self._sets]
+        return np.asarray(self._bm25.get_scores(q), dtype=float), coverage
+
+    def search(self, query: str, k: int = 3, country: str | None = None, pathway: str | None = None) -> list[Hit]:
+        scores, coverage = self.scores(query)
+        if not scores.any():
             return []
-        scores = self._bm25.get_scores(q)
-        order = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
-        hits = []
-        for i in order:
-            present = set(self._tokens[i])
-            coverage = sum(1 for t in set(q) if t in present) / len(set(q))
-            hits.append(Hit(self.chunks[i], float(scores[i]), coverage))
-        return hits
+        ok = allowed_mask(self.chunks, country, pathway)
+        order = [i for i in sorted(range(len(scores)), key=lambda i: scores[i], reverse=True) if ok[i]][:k]
+        return [Hit(self.chunks[i], float(scores[i]), coverage[i]) for i in order]

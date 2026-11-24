@@ -1,0 +1,24 @@
+{"q": "Do I need a provincial attestation letter to apply for a study permit?", "country": "CA", "expect": "ircc-sp-pal"}
+{"q": "How much living expenses money for one person outside Quebec?", "country": "CA", "expect": "ircc-sp-financial"}
+{"q": "What do I need to study in Quebec instead of a PAL?", "country": "CA", "expect": "ircc-sp-pal"}
+{"q": "Who can apply for a Canadian study permit?", "country": "CA", "expect": "ircc-sp-eligibility"}
+{"q": "Which visa does an international student need for a US university?", "country": "US", "expect": "us-ds-student-visa"}
+{"q": "What is Form I-20 and when do I bring it?", "country": "US", "expect": "us-ds-student-visa"}
+{"q": "How many days before the program can a student enter the United States?", "country": "US", "expect": "us-ds-student-visa"}
+{"q": "How much is the SEVIS fee for an F-1 student?", "country": "US", "expect": "us-ice-i901-faq"}
+{"q": "When must the SEVIS fee be paid before the visa interview?", "country": "US", "expect": "us-ice-i901-faq"}
+{"q": "Can an F-1 student attend a public high school?", "country": "US", "expect": "us-ds-public-schools"}
+{"q": "How long can I stay with a Schengen visa?", "country": "SCHENGEN", "expect": "eu-apply-schengen-visa"}
+{"q": "How early can I apply for a Schengen visa before travelling?", "country": "SCHENGEN", "expect": "eu-apply-schengen-visa"}
+{"q": "What is the Schengen visa fee for an adult?", "country": "SCHENGEN", "expect": "eu-apply-schengen-visa"}
+{"q": "Which consulate do I apply to if I visit several Schengen countries?", "country": "SCHENGEN", "expect": "eu-apply-schengen-visa"}
+{"q": "Which countries belong to the Schengen area?", "country": "SCHENGEN", "expect": "eu-schengen-area"}
+{"q": "Is Ireland part of the Schengen area?", "country": "SCHENGEN", "expect": "eu-schengen-area"}
+{"q": "What document is essential for a French student visa?", "country": "FR", "expect": "fr-visas-student"}
+{"q": "How much does the French student visa cost?", "country": "FR", "expect": "fr-visas-student"}
+{"q": "How long is the VLS-TS student visa valid?", "country": "FR", "expect": "fr-campusfrance-vls-ts"}
+{"q": "How many hours per week can a student with a French visa work?", "country": "FR", "expect": "fr-campusfrance-vls-ts"}
+{"q": "Do I have to validate my VLS-TS online after arrival?", "country": "FR", "expect": "fr-campusfrance-vls-ts"}
+{"q": "What is the best pizza restaurant in Casablanca?", "country": null, "expect": null}
+{"q": "German blue card salary threshold for engineers", "country": null, "expect": null}
+{"q": "Australian skilled migration points test", "country": null, "expect": null}

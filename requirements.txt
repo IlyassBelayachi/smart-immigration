@@ -27,3 +27,6 @@ opencv-python>=4.9,<5
 numpy>=1.26
 psycopg[binary]>=3.1
 cryptography>=42      # chiffrement de la CIN et du passeport
+
+# RAG hybride (recherche par le sens) : facultatif, active avec RAG_EMBEDDINGS=1
+fastembed>=0.3
