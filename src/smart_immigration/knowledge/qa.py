@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from .retrieval import Hit, LexicalIndex, content_tokens
+from .retrieval import Hit, content_tokens
 from ..schemas import AskResponse, Evidence
 
 # Seuils provisoires, a calibrer sur le jeu de questions annote (S3).
@@ -35,25 +35,36 @@ def _evidence(hit: Hit, query: str) -> Evidence:
         retrieved_at=c.retrieved_at,
         page_modified=c.page_modified,
         excerpt=_best_sentences(c.text, query) or c.text[:300],
+        country=c.country,
     )
 
 
-def answer(index: LexicalIndex, question: str, top_k: int = 3) -> AskResponse:
-    hits = index.search(question, k=top_k)
+def _passes(h: Hit) -> bool:
+    # La porte reste lexicale (mots de la question presents dans le passage) : les vecteurs aident a CLASSER,
+    # mais ne suffisent pas a repondre. Seuils provisoires, non calibres sur des questions reelles.
+    return h.score >= MIN_SCORE and h.coverage >= MIN_COVERAGE
+
+
+def answer(index, question: str, top_k: int = 3, country: str | None = None, pathway: str | None = None) -> AskResponse:
+    hits = index.search(question, k=top_k, country=country, pathway=pathway)
     meta = {
-        "method": "bm25",
+        "method": getattr(index, "method", "bm25"),
+        "filters": {"country": country, "pathway": pathway},
         "top_scores": [round(h.score, 3) for h in hits],
         "top_coverage": [round(h.coverage, 2) for h in hits],
     }
-    if not hits or hits[0].score < MIN_SCORE or hits[0].coverage < MIN_COVERAGE:
+    if any(h.cosine is not None for h in hits):
+        meta["top_cosine"] = [round(h.cosine or 0.0, 3) for h in hits]
+    good = [h for h in hits if _passes(h)]
+    if not good:
+        scope = f" pour {country.upper()}" if country else ""
         return AskResponse(
             question=question,
             answered=False,
             answer=None,
             evidence=[],
-            abstention_reason="Aucun passage suffisamment pertinent dans le corpus officiel indexe.",
+            abstention_reason=f"Aucun passage suffisamment pertinent dans le corpus officiel indexe{scope}.",
             retrieval=meta,
         )
-    evidence = [_evidence(h, question) for h in hits if h.score >= MIN_SCORE and h.coverage >= MIN_COVERAGE]
-    summary = evidence[0].excerpt
-    return AskResponse(question=question, answered=True, answer=summary, evidence=evidence, retrieval=meta)
+    evidence = [_evidence(h, question) for h in good]
+    return AskResponse(question=question, answered=True, answer=evidence[0].excerpt, evidence=evidence, retrieval=meta)

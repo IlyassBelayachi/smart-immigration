@@ -1,0 +1,16 @@
+# Espace Schengen, visa de court sejour (90 jours). Pages ouvertes et lues le 2026-11-20.
+# Attention : ces pages ne couvrent PAS les visas de long sejour (etudes, travail), qui sont nationaux.
+country: SCHENGEN
+pathway: short_stay_visa
+language: en
+sources:
+  - source_id: eu-apply-schengen-visa
+    title: "Applying for a Schengen visa (European Commission)"
+    url: https://home-affairs.ec.europa.eu/policies/schengen/visa-policy/applying-schengen-visa_en
+    page_modified: "2025-12-02"
+    verified: true
+  - source_id: eu-schengen-area
+    title: "Schengen area (European Commission)"
+    url: https://home-affairs.ec.europa.eu/policies/schengen/schengen-area_en
+    page_modified: "2025-05-27"
+    verified: true

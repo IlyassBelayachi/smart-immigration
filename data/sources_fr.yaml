@@ -1,0 +1,14 @@
+# France, visa long sejour etudiant (exemple national d'un pays Schengen). Pages ouvertes et lues le 2026-11-20.
+country: FR
+pathway: student_long_stay
+language: en
+sources:
+  - source_id: fr-visas-student
+    title: "Student (France-Visas)"
+    url: https://france-visas.gouv.fr/en/etudiant
+    verified: true
+  - source_id: fr-campusfrance-vls-ts
+    title: "Long Term Visa used as Residence Permit or VLS-TS (Campus France)"
+    url: https://www.campusfrance.org/en/student-long-stay-visa
+    page_modified: "2026-08-05"
+    verified: true

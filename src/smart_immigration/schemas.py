@@ -51,6 +51,7 @@ class Evidence(BaseModel):
     retrieved_at: datetime
     page_modified: str | None = None
     excerpt: str = Field(description="Extrait court (paraphrase ou passage), jamais la page entiere")
+    country: str | None = Field(default=None, description="Pays de la source (CA, US, SCHENGEN, FR...)")
 
 
 # ---------------------------------------------------------------- sortie d'agent
@@ -142,6 +143,8 @@ class ExtractedField(BaseModel):
 class AskRequest(BaseModel):
     question: str = Field(min_length=3, max_length=1000)
     top_k: int = Field(default=3, ge=1, le=10)
+    country: str | None = Field(default=None, max_length=20, description="Limiter la recherche a un pays (CA, US, SCHENGEN, FR)")
+    pathway: str | None = Field(default=None, max_length=40, description="Limiter a un parcours (study_permit, student_visa...)")
 
 
 class AskResponse(BaseModel):

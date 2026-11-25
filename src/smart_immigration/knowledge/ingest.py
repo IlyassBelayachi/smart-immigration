@@ -19,7 +19,7 @@ import yaml
 from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[3]
-SOURCES = ROOT / "data" / "sources.yaml"
+SOURCE_FILES = sorted((ROOT / "data").glob("sources*.yaml"))  # un fichier par pays : sources.yaml (CA), sources_us, ...
 OUT = ROOT / "data" / "corpus" / "chunks.jsonl"
 MAX_CHARS = 900
 
@@ -89,23 +89,24 @@ def build_chunks(src: dict, html: str, country: str, pathway: str, language: str
 
 
 def main() -> None:
-    cfg = yaml.safe_load(SOURCES.read_text(encoding="utf-8"))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     total = 0
-    with OUT.open("w", encoding="utf-8") as f, httpx.Client(timeout=30, follow_redirects=True,
-                                                            headers={"User-Agent": "EMSI-PFA-research/0.1"}) as client:
-        for src in cfg["sources"]:
-            try:
-                r = client.get(src["url"])
-                r.raise_for_status()
-            except httpx.HTTPError as e:
-                print(f"[SKIP] {src['source_id']}: {e}", file=sys.stderr)
-                continue
-            chunks = build_chunks(src, r.text, cfg["country"], cfg["pathway"], cfg["language"])
-            for c in chunks:
-                f.write(json.dumps(c, ensure_ascii=False) + "\n")
-            total += len(chunks)
-            print(f"[OK] {src['source_id']}: {len(chunks)} chunks")
+    headers = {"User-Agent": "EMSI-PFA-research/0.1"}
+    with OUT.open("w", encoding="utf-8") as f, httpx.Client(timeout=30, follow_redirects=True, headers=headers) as client:
+        for path in SOURCE_FILES:
+            cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+            for src in cfg["sources"]:
+                try:
+                    r = client.get(src["url"])
+                    r.raise_for_status()
+                except httpx.HTTPError as e:
+                    print(f"[SKIP] {src['source_id']}: {e}", file=sys.stderr)
+                    continue
+                chunks = build_chunks(src, r.text, cfg["country"], cfg["pathway"], cfg["language"])
+                for c in chunks:
+                    f.write(json.dumps(c, ensure_ascii=False) + "\n")
+                total += len(chunks)
+                print(f"[OK] {cfg['country']} {src['source_id']}: {len(chunks)} chunks")
     print(f"Ecrit {total} chunks dans {OUT}")
 
 
