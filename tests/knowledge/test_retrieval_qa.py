@@ -55,3 +55,17 @@ def test_abstains_out_of_scope(index):
 def test_abstains_on_unrelated_country(index):
     r = answer(index, "German blue card salary threshold for engineers")
     assert not r.answered
+
+
+def test_seed_fills_sources_missing_from_ingested_corpus(tmp_path, monkeypatch):
+    """Si l'ingestion n'a pas pu telecharger une source (403), ses passages d'amorcage restent disponibles."""
+    from smart_immigration.knowledge import retrieval
+
+    seed = load_chunks(retrieval.SEED_PATH)
+    ca = [c for c in seed if c.country == "CA"]
+    corpus = tmp_path / "chunks.jsonl"
+    corpus.write_text("\n".join(c.model_dump_json() for c in ca), encoding="utf-8")
+    monkeypatch.setattr(retrieval, "CORPUS_PATH", corpus)
+    merged = retrieval.load_chunks()
+    assert {c.country for c in merged} == {"CA", "US", "SCHENGEN", "FR"}
+    assert len(merged) == len(seed)  # aucun doublon : les sources deja ingerees ne sont pas reprises

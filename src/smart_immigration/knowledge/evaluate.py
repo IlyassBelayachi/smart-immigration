@@ -36,7 +36,8 @@ def evaluate(index, questions: list[dict], use_country: bool = False) -> dict:
             found = r.answered and q["expect"] in [e.source_id for e in r.evidence]
             hit += found
             if not found:
-                misses.append((q["q"], f"attendu {q['expect']}"))
+                got = [e.source_id for e in r.evidence] if r.answered else "abstention"
+                misses.append((q["q"], f"attendu {q['expect']}, obtenu {got}"))
     return {"hit@3": f"{hit}/{n_in}", "abstentions correctes": f"{abstain_ok}/{n_out}", "ratees": misses}
 
 

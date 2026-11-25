@@ -37,11 +37,24 @@ def content_tokens(text: str) -> list[str]:
     return [t for t in tokenize(text) if t not in _STOP and len(t) > 1]
 
 
-def load_chunks(path: Path | None = None) -> list[KnowledgeChunk]:
-    """Charge le corpus ingere ; a defaut, le corpus d'amorcage (paraphrases) pour la demo."""
-    path = path or (CORPUS_PATH if CORPUS_PATH.exists() else SEED_PATH)
+def _read(path: Path) -> list[KnowledgeChunk]:
     with path.open(encoding="utf-8") as f:
         return [KnowledgeChunk.model_validate(json.loads(line)) for line in f if line.strip()]
+
+
+def load_chunks(path: Path | None = None) -> list[KnowledgeChunk]:
+    """Corpus ingere (pages completes) COMPLETE par le corpus d'amorcage pour les sources absentes.
+
+    Certains sites refusent le telechargement automatique (erreur 403) : sans ce complement, leur pays
+    disparaitrait du corpus des que l'ingestion a tourne. Avec `path`, on lit exactement ce fichier.
+    """
+    if path is not None:
+        return _read(path)
+    if not CORPUS_PATH.exists():
+        return _read(SEED_PATH)
+    chunks = _read(CORPUS_PATH)
+    have = {c.source_id for c in chunks}
+    return chunks + [c for c in _read(SEED_PATH) if c.source_id not in have]
 
 
 @dataclass
